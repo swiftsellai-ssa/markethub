@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { PlaybookArticle } from "@/components/PlaybookArticle";
 
 export const metadata: Metadata = {
-  title: "How the X Content Bot actually runs — MarketHub Playbook",
+  title: "How the X Content Bot actually runs — MarketsXHub Playbook",
   description:
     "The X Content Bot researches the last 48 hours, writes one tweet or thread, and never publishes for you. Zero ad spend.",
 };

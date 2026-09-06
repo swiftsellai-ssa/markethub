@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { PlaybookArticle } from "@/components/PlaybookArticle";
 
 export const metadata: Metadata = {
-  title: "The 2x outlier rule — MarketHub Playbook",
+  title: "The 2x outlier rule — MarketsXHub Playbook",
   description:
     "Track every result. Find what is 2x above average. Push it harder. Build three variations. The winner becomes the new baseline.",
 };
@@ -41,7 +41,7 @@ export default function OutlierRulePage() {
         <li>The format that wins twice is the default until something beats it.</li>
       </ol>
       <p>
-        MarketHub does this in the hub. You can do it in a spreadsheet. The
+        MarketsXHub does this in the hub. You can do it in a spreadsheet. The
         spreadsheet will not research X at 6am. That is the only difference
         worth paying for.
       </p>

@@ -19,7 +19,9 @@ export default function XBotPage() {
           <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-lime">
             Bot 3 · Live · Zero spend
           </p>
-          <h1 className="mt-3 font-serif text-4xl">X Content Bot</h1>
+          <h1 className="mt-3 font-display text-4xl font-extrabold tracking-tight">
+            X Pit
+          </h1>
           <p className="mt-3 max-w-xl text-sm text-paper/65">
             Writing for {state.brand.name || "your brand"}. {weekdayName(today)}{" "}
             is a {contentTypeLabel(todayType).toLowerCase()} day. Copy the post,
@@ -111,7 +113,7 @@ export default function XBotPage() {
               <ul className="mt-4 space-y-4">
                 {wins.map((post) => (
                   <li key={post.id} className="text-sm">
-                    <p className="font-serif text-lg leading-snug">{post.hook}</p>
+                    <p className="font-display text-lg leading-snug">{post.hook}</p>
                     <p className="mt-1 font-mono text-[11px] text-lime">
                       score {post.score} · 2x winner
                     </p>

@@ -144,7 +144,7 @@ function typeBrief(type: ContentType): string {
     case "howto":
       return "one specific actionable tip";
     case "story":
-      return "one experience or result — building MarketHub by using MarketHub is fair game";
+      return "one experience or result — building MarketsXHub by using MarketsXHub is fair game";
     case "opinion":
       return "take a clear side on a niche debate";
     case "resource":

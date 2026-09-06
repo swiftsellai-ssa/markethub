@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { MarketingHeader } from "@/components/MarketingHeader";
+import { Shell } from "@/components/Shell";
+import { Ticker } from "@/components/Ticker";
 import { EMPTY_BRAND } from "@/lib/seed";
 import { useHub } from "@/lib/store";
 import type { Brand } from "@/lib/types";
@@ -15,20 +17,23 @@ export default function StartPage() {
 
   function go(demo: boolean) {
     onboard({ brand, email, demo });
-    router.push(demo ? "/hub/x" : "/hub/x");
+    router.push("/hub/x");
   }
 
   return (
-    <div className="min-h-screen bg-paper text-ink paper-grid">
+    <Shell>
+      <Ticker />
       <MarketingHeader />
-      <main className="mx-auto max-w-xl px-5 py-10 md:px-0">
-        <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-mute">
-          Workspace
+      <main className="mx-auto max-w-xl px-5 py-10">
+        <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-cyan">
+          Open a pit
         </p>
-        <h1 className="mt-3 font-serif text-4xl">Your product. Your bots.</h1>
-        <p className="mt-3 text-sm text-ink/70">
-          Free plan: 7 X runs and 1 SEO brief. No card. The bots write for the
-          brand you type here — not for MarketHub.
+        <h1 className="mt-3 font-display text-4xl font-extrabold tracking-tight md:text-5xl">
+          Your product. Your bots.
+        </h1>
+        <p className="mt-3 text-sm text-paper/65">
+          Free: 7 X runs and 1 SEO brief. No card. The bots write for the brand
+          you type here — not for MarketsXHub.
         </p>
 
         <form
@@ -95,21 +100,21 @@ export default function StartPage() {
             <button
               type="submit"
               disabled={!ready || !brand.name.trim() || !brand.niche.trim()}
-              className="rounded-sm bg-ink px-5 py-3 text-sm text-paper disabled:opacity-40"
+              className="bg-lime px-5 py-3 text-sm font-extrabold uppercase tracking-widest text-void disabled:opacity-40"
             >
-              Open my hub
+              Open my pit
             </button>
             <button
               type="button"
               onClick={() => go(true)}
-              className="rounded-sm border border-ink/20 px-5 py-3 text-sm"
+              className="border border-line px-5 py-3 text-sm text-paper/80 hover:border-lime hover:text-lime"
             >
-              Load MarketHub demo
+              Load MarketsXHub demo
             </button>
           </div>
         </form>
       </main>
-    </div>
+    </Shell>
   );
 }
 
@@ -139,7 +144,7 @@ function Field({
         value={value}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
-        className="mt-1 w-full border border-ink/15 bg-paper px-3 py-2 text-sm outline-none focus:border-ink"
+        className="mt-1 w-full border border-line bg-ink-2 px-3 py-2 text-sm text-paper outline-none placeholder:text-mute/50 focus:border-lime"
       />
     </label>
   );
@@ -166,7 +171,7 @@ function Area({
         value={value}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
-        className="mt-1 w-full border border-ink/15 bg-paper px-3 py-2 text-sm outline-none focus:border-ink"
+        className="mt-1 w-full border border-line bg-ink-2 px-3 py-2 text-sm text-paper outline-none placeholder:text-mute/50 focus:border-lime"
       />
     </label>
   );

@@ -64,7 +64,9 @@ export default function SeoBotPage() {
       <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-lime">
         Bot 1 · Live · {state.account.plan} · {seoRunsLeft}/{limit} briefs left
       </p>
-      <h1 className="mt-3 font-serif text-4xl">SEO Bot</h1>
+      <h1 className="mt-3 font-display text-4xl font-extrabold tracking-tight">
+        SEO Pit
+      </h1>
       <p className="mt-3 max-w-xl text-sm text-paper/65">
         Finds one winnable keyword for {state.brand.name || "your product"},
         writes the page, puts it in the queue. Ranking tracking still needs
@@ -93,7 +95,7 @@ export default function SeoBotPage() {
           <Link href="/playbook" className="underline">
             public playbook
           </Link>{" "}
-          — that is MarketHub&apos;s own SEO.
+          — that is MarketsXHub&apos;s own SEO.
         </p>
       ) : null}
       {error ? <p className="mt-3 text-sm text-warn">{error}</p> : null}
@@ -103,7 +105,7 @@ export default function SeoBotPage() {
           <p className="font-mono text-[11px] uppercase tracking-widest text-mute">
             {open.keyword}
           </p>
-          <h2 className="mt-2 font-serif text-2xl">{open.title}</h2>
+          <h2 className="mt-2 font-display text-2xl">{open.title}</h2>
           <p className="mt-2 text-sm text-paper/60">{open.meta}</p>
           <p className="mt-3 text-sm text-paper/70">{open.opportunity}</p>
           <div className="mt-4">
@@ -134,7 +136,7 @@ export default function SeoBotPage() {
                   onClick={() => setOpen(a)}
                   className="w-full border border-line bg-ink-2 px-4 py-3 text-left hover:border-lime/40"
                 >
-                  <span className="font-serif text-lg">{a.title}</span>
+                  <span className="font-display text-lg">{a.title}</span>
                   <span className="mt-1 block font-mono text-[11px] text-mute">
                     {a.keyword}
                   </span>

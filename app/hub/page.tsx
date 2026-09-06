@@ -9,25 +9,25 @@ import { shortDate } from "@/lib/format";
 const DESKS = [
   {
     href: "/hub/x",
-    name: "X Content Bot",
+    name: "X Pit",
     status: "Live",
     blurb: "Daily posts. Zero spend. Research → write → copy → log.",
   },
   {
     href: "/hub/seo",
-    name: "SEO Bot",
+    name: "SEO Pit",
     status: "Live",
     blurb: "One keyword, one page brief. Ranking crawl comes later.",
   },
   {
     href: "/hub/video",
-    name: "Video Bot",
+    name: "Video Pit",
     status: "Week 3",
     blurb: "Scripts and shorts. Avatar render comes later.",
   },
   {
     href: "/hub/ads",
-    name: "Ads Bot",
+    name: "Ads Pit",
     status: "Week 4",
     blurb: "Creatives and kill/scale. Spend stays paused until you say go.",
   },
@@ -47,7 +47,7 @@ export default function HubOverview() {
       <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-lime">
         {weekdayName(today)} · {shortDate(today)}
       </p>
-      <h1 className="mt-3 font-serif text-4xl md:text-5xl">
+      <h1 className="mt-3 font-display text-4xl md:text-5xl">
         {state.brand.name || "Four desks."}
       </h1>
       <p className="mt-3 max-w-xl text-paper/65">
@@ -79,7 +79,7 @@ export default function HubOverview() {
                 <span className="text-mute">Preview</span>
               )}
             </div>
-            <h2 className="mt-4 font-serif text-2xl">{desk.name}</h2>
+            <h2 className="mt-4 font-display text-2xl">{desk.name}</h2>
             <p className="mt-2 text-sm text-paper/60">{desk.blurb}</p>
           </Link>
         ))}
@@ -91,7 +91,7 @@ export default function HubOverview() {
         </p>
         {todayPost ? (
           <>
-            <p className="mt-4 font-serif text-2xl leading-snug">
+            <p className="mt-4 font-display text-2xl leading-snug">
               {todayPost.tweets[0]}
             </p>
             <p className="mt-3 font-mono text-[11px] uppercase tracking-widest text-mute">
@@ -132,7 +132,7 @@ function Stat({ label, value }: { label: string; value: string }) {
       <p className="font-mono text-[11px] uppercase tracking-widest text-mute">
         {label}
       </p>
-      <p className="mt-2 font-serif text-3xl">{value}</p>
+      <p className="mt-2 font-display text-3xl">{value}</p>
     </div>
   );
 }

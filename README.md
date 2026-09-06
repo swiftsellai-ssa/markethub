@@ -1,4 +1,4 @@
-# MarketHub
+# MarketsXHub
 
 Four bots. Entire marketing stack. They run every morning.
 
@@ -13,4 +13,4 @@ npm run dev
 - `/` landing · `/start` onboard any brand · `/pricing` · `/playbook`
 - `/hub/x` X Content Bot · `/hub/seo` SEO briefs
 
-`XAI_API_KEY` unlocks live generation (Grok 4.6 + X/web search). Without it, the MarketHub demo queue still ships.
+`XAI_API_KEY` unlocks live generation (Grok 4.6 + X/web search). Without it, the MarketsXHub demo queue still ships.

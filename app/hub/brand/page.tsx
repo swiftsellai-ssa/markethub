@@ -36,10 +36,10 @@ export default function BrandPage() {
       <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-lime">
         Voice
       </p>
-      <h1 className="mt-3 font-serif text-4xl">Brand</h1>
+      <h1 className="mt-3 font-display text-4xl font-extrabold tracking-tight">Brand</h1>
       <p className="mt-3 text-sm text-paper/65">
-        The X bot writes in this voice. Right now it is marketing MarketHub to
-        founders. Change it when you point the bots at another product.
+        The X pit writes in this voice. Right now it is marketing MarketsXHub
+        to founders. Change it when you point the bots at another product.
       </p>
 
       <form onSubmit={save} className="mt-8 space-y-4">

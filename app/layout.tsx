@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
+import { Geist_Mono, Syne } from "next/font/google";
 import { HubProvider } from "@/lib/store";
 import "./globals.css";
 
-const geist = Geist({
+const syne = Syne({
   subsets: ["latin"],
-  variable: "--font-geist",
+  variable: "--font-syne",
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 const geistMono = Geist_Mono({
@@ -13,16 +14,10 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
 });
 
-const instrument = Instrument_Serif({
-  subsets: ["latin"],
-  weight: "400",
-  variable: "--font-instrument",
-});
-
 export const metadata: Metadata = {
-  title: "MarketHub — Four bots. Entire marketing stack.",
+  title: "MarketsXHub — Four desks. The X pit is live.",
   description:
-    "SEO, video, X, and ads bots that research, publish, track, and double down on 2x winners. Built by founders who were tired of doing marketing by hand.",
+    "MarketsXHub is a four-desk marketing floor. SEO, video, X, and ads bots that research, publish, track, and clone 2x winners. Point it at your brand.",
   icons: { icon: "/favicon.svg" },
 };
 
@@ -30,10 +25,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html
-      lang="en"
-      className={`${geist.variable} ${geistMono.variable} ${instrument.variable}`}
-    >
+    <html lang="en" className={`${syne.variable} ${geistMono.variable}`}>
       <body className="font-sans antialiased">
         <HubProvider>{children}</HubProvider>
       </body>

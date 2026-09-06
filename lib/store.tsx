@@ -24,8 +24,8 @@ import type {
   Strategy,
 } from "./types";
 
-const STORAGE_KEY = "markethub.v2";
-const LEGACY_KEY = "markethub.v1";
+const STORAGE_KEY = "marketsxhub.v1";
+const LEGACY_KEY = "markethub.v2";
 
 type HubContextValue = {
   ready: boolean;
@@ -80,10 +80,12 @@ function migrate(raw: unknown): HubState | null {
 function loadState(): HubState {
   if (typeof window === "undefined") return EMPTY_STATE;
   try {
-    const v2 = window.localStorage.getItem(STORAGE_KEY);
-    if (v2) return migrate(JSON.parse(v2)) ?? EMPTY_STATE;
-    const v1 = window.localStorage.getItem(LEGACY_KEY);
-    if (v1) return migrate(JSON.parse(v1)) ?? EMPTY_STATE;
+    const current = window.localStorage.getItem(STORAGE_KEY);
+    if (current) return migrate(JSON.parse(current)) ?? EMPTY_STATE;
+    for (const key of [LEGACY_KEY, "markethub.v1"]) {
+      const raw = window.localStorage.getItem(key);
+      if (raw) return migrate(JSON.parse(raw)) ?? EMPTY_STATE;
+    }
     return EMPTY_STATE;
   } catch {
     return EMPTY_STATE;

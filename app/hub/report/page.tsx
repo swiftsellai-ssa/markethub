@@ -19,13 +19,13 @@ export default function ReportPage() {
       <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-lime">
         Weekly
       </p>
-      <h1 className="mt-3 font-serif text-4xl">Report</h1>
+      <h1 className="mt-3 font-display text-4xl">Report</h1>
       <p className="mt-3 max-w-xl text-sm text-paper/65">
         Same shape every Monday: what moved, what died, what to clone. The X bot
         fills this as you log metrics. The other bots join when they go live.
       </p>
 
-      <blockquote className="mt-10 max-w-3xl border-l-2 border-lime pl-5 font-serif text-2xl leading-snug md:text-3xl">
+      <blockquote className="mt-10 max-w-3xl border-l-2 border-lime pl-5 font-display text-2xl leading-snug md:text-3xl">
         This week: {posted.length} posts with numbers. {wins.length} hit 2x.
         {worst
           ? ` Worst: “${worst.hook}”.`
@@ -50,7 +50,7 @@ export default function ReportPage() {
             <ul className="mt-4 space-y-3">
               {wins.map((p) => (
                 <li key={p.id}>
-                  <p className="font-serif text-lg">{p.hook}</p>
+                  <p className="font-display text-lg">{p.hook}</p>
                   <p className="font-mono text-[11px] text-lime">
                     {shortDate(p.date)} · score {p.score} · {p.format}
                   </p>
@@ -77,7 +77,7 @@ function Stat({ label, value }: { label: string; value: string }) {
       <p className="font-mono text-[11px] uppercase tracking-widest text-mute">
         {label}
       </p>
-      <p className="mt-2 font-serif text-3xl">{value}</p>
+      <p className="mt-2 font-display text-3xl">{value}</p>
     </div>
   );
 }

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { PlaybookArticle } from "@/components/PlaybookArticle";
 
 export const metadata: Metadata = {
-  title: "Four bots, one morning — MarketHub Playbook",
+  title: "Four bots, one morning — MarketsXHub Playbook",
   description:
     "SEO, video, X, and ads bots. Each owns a channel. Each runs research, publish, and track. Do not stand up all four at once.",
 };

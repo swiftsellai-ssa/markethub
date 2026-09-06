@@ -21,13 +21,13 @@ export const EMPTY_ACCOUNT: Account = {
 };
 
 export const DEFAULT_BRAND: HubState["brand"] = {
-  name: "MarketHub",
+  name: "MarketsXHub",
   niche: "AI marketing automation for founders",
   product:
-    "MarketHub — four bots that own SEO, video, X, and ads. Each one researches, publishes, tracks results, and doubles down on anything that hits 2x average.",
+    "MarketsXHub — four pits that own SEO, video, X, and ads. Each one researches, publishes, tracks results, and doubles down on anything that hits 2x average.",
   audience:
     "Founders who shipped a product and now need marketing without hiring a team",
-  cta: "Open MarketHub, copy today's post, ship it",
+  cta: "Open MarketsXHub, copy today's post, ship it",
   tone: "Direct, practical, no fluff. Short sentences. Never 'I'm excited to share.'",
   siteUrl: "",
   xHandle: "",
@@ -88,7 +88,7 @@ export const SEED_POSTS: HubState["posts"] = [
     tweets: [
       "You don't need 200 AI posts a day. You need one post that beats your average by 2x — then three variations of it tomorrow.",
       "Volume without a loop is noise. Every 'AI marketing agent' I read this week scrapes, writes, and dumps. None of them read the scoreboard.",
-      "MarketHub's X bot does three things: research what's winning, write one post, wait for the data.",
+      "MarketsXHub's X bot does three things: research what's winning, write one post, wait for the data.",
       "If a post hits 2x average engagement, it becomes the template. The format that wins twice becomes the default.",
       "That's the whole product. Four bots. Same loop. SEO, video, X, ads.",
       "The bot doesn't guess. The data decides. You copy and post.",
@@ -123,14 +123,14 @@ export const SEED_POSTS: HubState["posts"] = [
     date: "2026-09-09",
     kind: "thread",
     tweets: [
-      "We built MarketHub the dishonest way first: a doc full of prompts. Then we made the X bot eat its own cooking.",
+      "We built MarketsXHub the dishonest way first: a doc full of prompts. Then we made the X bot eat its own cooking.",
       "This morning it read what was winning in AI marketing, wrote one post, and put it in a queue. No ads. No spend.",
       "The embarrassing part: the first draft sounded like every other 'I replaced my marketing team' thread.",
       "So we added a kill rule. If a format underperforms, it gets banned. If it 2xs, it becomes the template.",
       "Dogfooding isn't a vibe. It's the only way a content bot doesn't drift into sludge.",
       "Tomorrow's post is already in the hub. I just have to copy it.",
     ],
-    hook: "We built MarketHub the dishonest way first.",
+    hook: "We built MarketsXHub the dishonest way first.",
     topic: "Dogfooding the X bot",
     format: "Story with a scar",
     contentType: "story",
@@ -163,7 +163,7 @@ export const SEED_POSTS: HubState["posts"] = [
       "Publish: one piece, on-format, ready to copy. Not a folder of 40 drafts you'll never ship.",
       "Track: read the scoreboard. 2x average becomes the template. The rest gets cut.",
       "SEO, video, X, ads — same three modes. Different channel.",
-      "That's MarketHub. Steal the loop even if you never open the hub.",
+      "That's MarketsXHub. Steal the loop even if you never open the hub.",
     ],
     hook: "Every marketing bot needs three modes.",
     topic: "Research / publish / track",

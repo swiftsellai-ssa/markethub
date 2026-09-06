@@ -55,7 +55,7 @@ export function PostCard({
       </header>
 
       <div className="px-4 py-4">
-        <p className="font-serif text-xl leading-snug md:text-2xl">
+        <p className="font-display text-xl leading-snug md:text-2xl">
           {post.tweets[0]}
         </p>
         {open || featured ? (

@@ -18,7 +18,7 @@ export function ComingDesk({
       <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-mute">
         Bot {id} · {week}
       </p>
-      <h1 className="mt-3 font-serif text-4xl">{name}</h1>
+      <h1 className="mt-3 font-display text-4xl">{name}</h1>
       <p className="mt-4 max-w-2xl text-lg text-paper/70">{loop}</p>
 
       <ol className="mt-10 max-w-2xl space-y-4">
