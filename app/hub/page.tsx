@@ -9,25 +9,25 @@ import { shortDate } from "@/lib/format";
 const DESKS = [
   {
     href: "/hub/x",
-    name: "X Pit",
+    name: "X",
     status: "Live",
     blurb: "Daily posts. Zero spend. Research → write → copy → log.",
   },
   {
     href: "/hub/seo",
-    name: "SEO Pit",
+    name: "SEO",
     status: "Live",
     blurb: "One keyword, one page brief. Ranking crawl comes later.",
   },
   {
     href: "/hub/video",
-    name: "Video Pit",
+    name: "Video",
     status: "Week 3",
     blurb: "Scripts and shorts. Avatar render comes later.",
   },
   {
     href: "/hub/ads",
-    name: "Ads Pit",
+    name: "Ads",
     status: "Week 4",
     blurb: "Creatives and kill/scale. Spend stays paused until you say go.",
   },

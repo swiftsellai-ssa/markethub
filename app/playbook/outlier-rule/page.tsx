@@ -12,12 +12,13 @@ export default function OutlierRulePage() {
     <PlaybookArticle
       kicker="Playbook"
       title="The 2x outlier rule"
-      dek="Most AI marketing tools generate. Almost none keep score. The loop is the product."
+      dek="A 2× outlier is any post that scores at least twice your account's average engagement."
     >
       <p>
-        Track every result. Find what is performing 2x above average. Push it
-        harder. Build variations of it. Test the variations. The winner of the
-        variations becomes the new baseline. Repeat.
+        Score = likes + replies × 2 + reposts × 3. Average the posts you have
+        logged. Anything at or above 2× that average is an outlier. Clone the
+        format — not the joke — into three new posts. The format that wins twice
+        becomes the baseline.
       </p>
       <p>
         That paragraph is the whole company. SEO pages that climb get more

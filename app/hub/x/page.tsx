@@ -20,7 +20,7 @@ export default function XBotPage() {
             Bot 3 · Live · Zero spend
           </p>
           <h1 className="mt-3 font-display text-4xl font-extrabold tracking-tight">
-            X Pit
+            X desk
           </h1>
           <p className="mt-3 max-w-xl text-sm text-paper/65">
             Writing for {state.brand.name || "your brand"}. {weekdayName(today)}{" "}

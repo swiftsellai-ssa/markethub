@@ -32,7 +32,7 @@ export function PlaybookArticle({
         </div>
         <p className="mt-12 font-mono text-[11px] uppercase tracking-[0.18em] text-mute">
           <Link href="/start" className="text-lime hover:text-cyan">
-            Open a pit
+            Start free
           </Link>
           {" · "}
           <Link href="/playbook" className="hover:text-lime">

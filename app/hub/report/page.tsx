@@ -19,7 +19,9 @@ export default function ReportPage() {
       <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-lime">
         Weekly
       </p>
-      <h1 className="mt-3 font-display text-4xl">Report</h1>
+      <h1 className="mt-3 font-display text-4xl font-extrabold tracking-tight">
+        Report
+      </h1>
       <p className="mt-3 max-w-xl text-sm text-paper/65">
         Same shape every Monday: what moved, what died, what to clone. The X bot
         fills this as you log metrics. The other bots join when they go live.

@@ -24,7 +24,7 @@ export const DEFAULT_BRAND: HubState["brand"] = {
   name: "MarketsXHub",
   niche: "AI marketing automation for founders",
   product:
-    "MarketsXHub — four pits that own SEO, video, X, and ads. Each one researches, publishes, tracks results, and doubles down on anything that hits 2x average.",
+    "MarketsXHub — four desks that own SEO, video, X, and ads. Each one researches, publishes, tracks results, and doubles down on anything that hits 2x average.",
   audience:
     "Founders who shipped a product and now need marketing without hiring a team",
   cta: "Open MarketsXHub, copy today's post, ship it",

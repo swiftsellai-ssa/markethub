@@ -2,31 +2,32 @@ import Link from "next/link";
 import { MarketingHeader } from "@/components/MarketingHeader";
 import { Shell } from "@/components/Shell";
 import { Ticker } from "@/components/Ticker";
+import { Workflow } from "@/components/Workflow";
 
 const BOTS = [
   {
     id: "01",
-    name: "SEO Pit",
+    name: "SEO",
     status: "Live",
-    line: "One winnable keyword. One page. Queue it. Rankings come later.",
+    line: "Finds one winnable keyword and writes the page. You publish it.",
   },
   {
     id: "02",
-    name: "Video Pit",
-    status: "Next",
-    line: "Trends in. Scripts out. Same face, every platform.",
+    name: "Video",
+    status: "Coming",
+    line: "Scripts from what's trending. Rendering comes with this desk.",
   },
   {
     id: "03",
-    name: "X Pit",
+    name: "X",
     status: "Live",
-    line: "Reads the tape. Writes one post. Clones 2x winners.",
+    line: "Reads 48 hours of your niche. Writes one post. Clones 2× winners.",
   },
   {
     id: "04",
-    name: "Ads Pit",
-    status: "Next",
-    line: "Steal the format that has been running 30 days. Kill the rest.",
+    name: "Ads",
+    status: "Coming",
+    line: "Builds creatives from long-running competitor ads. Spend stays paused until you say go.",
   },
 ];
 
@@ -37,38 +38,53 @@ export default function LandingPage() {
       <MarketingHeader />
 
       <main>
-        <section className="relative px-5 pb-20 pt-12 md:px-10 md:pt-20">
+        <section className="relative px-5 pb-16 pt-12 md:px-10 md:pt-16">
           <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.32em] text-cyan">
             <span className="live-dot" />
-            Night pit · X desk open · zero spend
+            X and SEO live · video and ads next · you still hit publish
           </p>
-          <h1 className="mt-6 max-w-5xl font-display text-[14vw] font-extrabold leading-[0.8] tracking-[-0.06em] md:text-[9rem]">
-            Markets
-            <span className="text-lime">X</span>
-            Hub
+          <h1 className="mt-6 font-display text-[12vw] font-extrabold leading-[0.82] tracking-[-0.05em] md:text-[8.5rem]">
+            Markets<span className="text-lime">X</span>Hub
           </h1>
-          <p className="mt-8 max-w-xl text-lg leading-relaxed text-paper/70">
-            Four desks. One morning. Each bot owns a channel — research, publish,
-            track, then shove whatever hits 2x. Point it at your brand. It does
-            not write as us.
+          <p className="mt-8 max-w-2xl text-xl leading-snug text-paper md:text-2xl">
+            MarketsXHub is an AI growth operating system that tests content,
+            tracks performance, and scales what works.
+          </p>
+          <p className="mt-4 max-w-xl text-paper/60">
+            Four desks — SEO, video, X, ads. Each one researches, writes one
+            piece, waits for the number, then clones anything that hits{" "}
+            <strong className="text-paper">2× your average engagement</strong>.
+            Point it at your brand. It does not write as us.
           </p>
           <div className="mt-10 flex flex-wrap items-center gap-4">
             <Link
               href="/start"
               className="bg-lime px-6 py-3 text-sm font-extrabold uppercase tracking-widest text-void hover:bg-cyan"
             >
-              Open a pit — 7 X runs
+              Start free — 7 X runs
             </Link>
             <Link
               href="/pricing"
               className="font-mono text-[11px] uppercase tracking-[0.22em] text-mute hover:text-lime"
             >
-              Desk $39 · founding 50 @ $19
+              Desk $39/mo · founding 50 at $19/mo
             </Link>
           </div>
         </section>
 
-        <section className="grid border-y border-line md:grid-cols-4">
+        <section className="border-y border-line px-5 py-16 md:px-10">
+          <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-cyan">
+            After you sign up
+          </p>
+          <h2 className="mt-3 max-w-3xl font-display text-3xl font-extrabold tracking-tight md:text-4xl">
+            One experiment a day. The scoreboard decides the next one.
+          </h2>
+          <div className="mt-10">
+            <Workflow />
+          </div>
+        </section>
+
+        <section className="grid border-b border-line md:grid-cols-4">
           {BOTS.map((bot) => (
             <article
               key={bot.id}
@@ -79,11 +95,9 @@ export default function LandingPage() {
               <div className="flex items-baseline justify-between gap-3 font-mono text-[11px] uppercase tracking-widest">
                 <span className="text-mute">{bot.id}</span>
                 <span
-                  className={
-                    bot.status === "Live" ? "text-lime" : "text-mute"
-                  }
+                  className={bot.status === "Live" ? "text-lime" : "text-mute"}
                 >
-                  {bot.status === "Live" ? "● live" : "dark"}
+                  {bot.status === "Live" ? "● live" : "coming"}
                 </span>
               </div>
               <h2 className="mt-6 font-display text-3xl font-bold tracking-tight">
@@ -96,61 +110,23 @@ export default function LandingPage() {
           ))}
         </section>
 
-        <section className="grid gap-12 px-5 py-20 md:grid-cols-2 md:px-10">
-          <div>
-            <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-cyan">
-              Not another generator
-            </p>
-            <h2 className="mt-4 font-display text-4xl font-extrabold leading-[0.95] tracking-tight md:text-5xl">
-              n8n dumps content.
-              <br />
-              A pit keeps score.
-            </h2>
-            <p className="mt-5 text-paper/65">
-              The tape is full of agents that scrape, write, and spray.
-              MarketsXHub writes one piece, waits for the number, and clones
-              only the 2x outliers. You still hit publish. We still refuse to
-              spend your ads budget without a click.
-            </p>
-          </div>
-          <div className="border border-line bg-ink-2 p-6 glow-cyan">
-            <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-mute">
-              The board
-            </p>
-            <ul className="mt-6 space-y-4 text-sm leading-relaxed">
-              <li>
-                <span className="text-lime">Free.</span> Your brand, 7 X runs, 1
-                SEO brief, the scoreboard.
-              </li>
-              <li>
-                <span className="text-lime">Desk — $39/mo.</span> Daily X. 90
-                runs. Founding 50 lock $19.
-              </li>
-              <li>
-                <span className="text-lime">Floor — $99/mo.</span> All four pits
-                as they open. SEO live now.
-              </li>
-            </ul>
-            <Link
-              href="/pricing"
-              className="mt-6 inline-block font-mono text-[11px] uppercase tracking-[0.22em] text-cyan hover:text-lime"
-            >
-              Full board →
-            </Link>
-          </div>
-        </section>
-
         <section
           id="loop"
-          className="border-y border-line bg-ink-2 px-5 py-20 md:px-10"
+          className="border-b border-line bg-ink-2 px-5 py-16 md:px-10"
         >
           <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-hot">
-            Outlier rule
+            What 2× means
           </p>
-          <h2 className="mt-5 max-w-4xl font-display text-4xl font-extrabold leading-[0.95] tracking-tight md:text-6xl">
-            Track every tick. Find 2x. Push it. Three variations. Winner becomes
-            the baseline.
+          <h2 className="mt-4 max-w-4xl font-display text-3xl font-extrabold leading-tight tracking-tight md:text-5xl">
+            A 2× outlier is any post that scores at least twice your account&apos;s
+            average engagement.
           </h2>
+          <p className="mt-5 max-w-2xl text-paper/65">
+            Score = likes + replies × 2 + reposts × 3. We average the last posts
+            you logged. Hit 2× that number and the format becomes the template
+            for three new variations. Miss it and that format gets dropped.
+            Not clicks. Not revenue. Engagement you can paste from X tonight.
+          </p>
           <Link
             href="/playbook/outlier-rule"
             className="mt-8 inline-block font-mono text-[11px] uppercase tracking-[0.22em] text-lime"
@@ -159,16 +135,61 @@ export default function LandingPage() {
           </Link>
         </section>
 
-        <section className="px-5 py-20 md:px-10">
+        <section className="grid gap-12 px-5 py-16 md:grid-cols-2 md:px-10">
+          <div>
+            <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-cyan">
+              Not another generator
+            </p>
+            <h2 className="mt-4 font-display text-4xl font-extrabold leading-[0.95] tracking-tight md:text-5xl">
+              Generators dump content.
+              <br />
+              A desk keeps score.
+            </h2>
+            <p className="mt-5 text-paper/65">
+              Most AI marketing tools scrape, write, and spray. MarketsXHub
+              writes one piece, waits for the number, and clones only the 2×
+              outliers. You still hit publish. We still refuse to spend your ads
+              budget without a click.
+            </p>
+          </div>
+          <div className="border border-line bg-ink-2 p-6 glow-cyan">
+            <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-mute">
+              What you buy
+            </p>
+            <ul className="mt-6 space-y-4 text-sm leading-relaxed">
+              <li>
+                <span className="text-lime">Free — $0.</span> Try the loop. 7 X
+                posts, 1 SEO brief.
+              </li>
+              <li>
+                <span className="text-lime">Desk — $39/mo.</span> Daily X bot.
+                First 50 people lock <strong>$19/mo for 12 months</strong>, then
+                $39. Not a one-time fee.
+              </li>
+              <li>
+                <span className="text-lime">Floor — $99/mo.</span> Every desk
+                that is live now, plus Video and Ads when they launch.
+              </li>
+            </ul>
+            <Link
+              href="/pricing"
+              className="mt-6 inline-block font-mono text-[11px] uppercase tracking-[0.22em] text-cyan hover:text-lime"
+            >
+              Compare plans →
+            </Link>
+          </div>
+        </section>
+
+        <section className="px-5 py-16 md:px-10">
           <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-mute">
-            Open one pit
+            Start with one desk
           </p>
           <h2 className="mt-4 font-display text-4xl font-extrabold tracking-tight md:text-5xl">
             X this week. SEO when you&apos;re ready.
           </h2>
           <p className="mt-4 max-w-xl text-paper/60">
-            Two minutes to point the floor at any product. Or load the
-            MarketsXHub demo and watch us eat our own cooking.
+            Two minutes to point MarketsXHub at any product. Or load the demo
+            and see how we run the same loop on ourselves.
           </p>
           <Link
             href="/start"
@@ -179,8 +200,8 @@ export default function LandingPage() {
         </section>
       </main>
 
-      <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-line px-5 py-6 font-mono text-[11px] uppercase tracking-[0.18em] text-mute md:px-10">
-        <span>MarketsXHub · four pits · one morning</span>
+      <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-line px-5 py-6 font-mono text-[11px] tracking-[0.12em] text-mute md:px-10">
+        <span>MarketsXHub · four desks · one morning</span>
         <Link href="/pricing" className="hover:text-lime">
           Founding 50 open
         </Link>

@@ -7,12 +7,12 @@ import { useHub } from "@/lib/store";
 
 const NAV = [
   { href: "/hub", label: "Overview", live: false },
-  { href: "/hub/x", label: "X Pit", live: true },
-  { href: "/hub/seo", label: "SEO Pit", live: true },
+  { href: "/hub/x", label: "X", live: true },
+  { href: "/hub/seo", label: "SEO", live: true },
   { href: "/hub/video", label: "Video", live: false },
   { href: "/hub/ads", label: "Ads", live: false },
   { href: "/hub/brand", label: "Brand", live: false },
-  { href: "/hub/report", label: "Tape", live: false },
+  { href: "/hub/report", label: "Report", live: false },
 ];
 
 export default function HubLayout({ children }: { children: React.ReactNode }) {
@@ -30,7 +30,7 @@ export default function HubLayout({ children }: { children: React.ReactNode }) {
             <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.22em] text-mute">
               {ready && state.account.onboarded
                 ? state.brand.name || "Workspace"
-                : "Night pit"}
+                : "Workspace"}
             </p>
           </div>
           <nav className="flex gap-1 overflow-x-auto px-2 pb-3 md:flex-col md:px-3 md:pb-6">
@@ -68,7 +68,7 @@ export default function HubLayout({ children }: { children: React.ReactNode }) {
           {ready && !state.account.onboarded ? (
             <div className="px-5 py-16 md:px-10">
               <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-lime">
-                New pit
+                New workspace
               </p>
               <h1 className="mt-3 font-display text-4xl font-extrabold tracking-tight">
                 Tell the bots who you are.
@@ -81,7 +81,7 @@ export default function HubLayout({ children }: { children: React.ReactNode }) {
                 href="/start"
                 className="mt-8 inline-block bg-lime px-4 py-2 text-xs font-extrabold uppercase tracking-widest text-void"
               >
-                Open a pit
+                Start free
               </Link>
             </div>
           ) : (

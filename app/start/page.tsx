@@ -26,7 +26,7 @@ export default function StartPage() {
       <MarketingHeader />
       <main className="mx-auto max-w-xl px-5 py-10">
         <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-cyan">
-          Open a pit
+          Start free
         </p>
         <h1 className="mt-3 font-display text-4xl font-extrabold tracking-tight md:text-5xl">
           Your product. Your bots.
@@ -102,7 +102,7 @@ export default function StartPage() {
               disabled={!ready || !brand.name.trim() || !brand.niche.trim()}
               className="bg-lime px-5 py-3 text-sm font-extrabold uppercase tracking-widest text-void disabled:opacity-40"
             >
-              Open my pit
+              Create workspace
             </button>
             <button
               type="button"

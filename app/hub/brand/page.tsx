@@ -38,7 +38,7 @@ export default function BrandPage() {
       </p>
       <h1 className="mt-3 font-display text-4xl font-extrabold tracking-tight">Brand</h1>
       <p className="mt-3 text-sm text-paper/65">
-        The X pit writes in this voice. Right now it is marketing MarketsXHub
+        The X desk writes in this voice. Right now it is marketing MarketsXHub
         to founders. Change it when you point the bots at another product.
       </p>
 

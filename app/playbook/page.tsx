@@ -11,12 +11,12 @@ const POSTS = [
   },
   {
     href: "/playbook/four-bots",
-    title: "Four pits, one morning",
+    title: "Four desks, one morning",
     dek: "SEO, video, X, ads — same three modes on every desk.",
   },
   {
     href: "/playbook/x-content-bot",
-    title: "How the X pit actually runs",
+    title: "How the X desk actually runs",
     dek: "Research the last 48 hours. Write one post. Do not publish for you.",
   },
 ];
@@ -31,11 +31,11 @@ export default function PlaybookPage() {
           Playbook
         </p>
         <h1 className="mt-3 max-w-3xl font-display text-5xl font-extrabold leading-[0.95] tracking-tight">
-          Steal the loop even if you never pay us.
+          Use the loop even if you never pay us.
         </h1>
         <p className="mt-4 max-w-xl text-paper/65">
           MarketsXHub is a product. The compounding rule is not a secret. These
-          pages are also how we eat our own SEO cooking.
+          pages are also how we run SEO on ourselves.
         </p>
         <div className="mt-12 grid gap-4 md:grid-cols-3">
           {POSTS.map((post) => (

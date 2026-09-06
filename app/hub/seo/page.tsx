@@ -65,7 +65,7 @@ export default function SeoBotPage() {
         Bot 1 · Live · {state.account.plan} · {seoRunsLeft}/{limit} briefs left
       </p>
       <h1 className="mt-3 font-display text-4xl font-extrabold tracking-tight">
-        SEO Pit
+        SEO desk
       </h1>
       <p className="mt-3 max-w-xl text-sm text-paper/65">
         Finds one winnable keyword for {state.brand.name || "your product"},

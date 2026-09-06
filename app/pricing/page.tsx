@@ -5,7 +5,7 @@ import { useState } from "react";
 import { MarketingHeader } from "@/components/MarketingHeader";
 import { Shell } from "@/components/Shell";
 import { Ticker } from "@/components/Ticker";
-import { PLANS } from "@/lib/plans";
+import { PLAN_COMPARE, PLANS } from "@/lib/plans";
 import { useHub } from "@/lib/store";
 
 export default function PricingPage() {
@@ -37,14 +37,16 @@ export default function PricingPage() {
       <MarketingHeader />
       <main className="px-5 py-12 md:px-10">
         <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-cyan">
-          The board
+          Pricing
         </p>
         <h1 className="mt-3 max-w-3xl font-display text-5xl font-extrabold leading-[0.95] tracking-tight md:text-6xl">
-          Cheaper than a freelancer. Stricter than a content hose.
+          Pay for the loop, not a pile of drafts.
         </h1>
         <p className="mt-4 max-w-xl text-paper/65">
-          You are not paying for AI tweets. You are paying for a daily loop that
-          reads the scoreboard. First 50 desks lock $19/mo for a year.
+          Founding 50 is <strong className="text-paper">$19 per month</strong>{" "}
+          for Desk, locked for 12 months. After that — or after 50 people —
+          Desk is $39/mo. No one-time fee. No charge today; we email you when
+          billing opens.
         </p>
 
         <div className="mt-12 grid gap-4 md:grid-cols-3">
@@ -58,6 +60,7 @@ export default function PricingPage() {
               <p className="font-mono text-[11px] uppercase tracking-widest text-mute">
                 {plan.name}
               </p>
+              <p className="mt-1 text-sm text-cyan">{plan.subtitle}</p>
               <p className="mt-4 font-display text-5xl font-extrabold">
                 {plan.price === 0 ? "$0" : `$${plan.price}`}
                 {plan.price > 0 ? (
@@ -66,13 +69,11 @@ export default function PricingPage() {
               </p>
               {plan.foundingPrice ? (
                 <p className="mt-1 text-sm text-lime">
-                  Founding 50: ${plan.foundingPrice}/mo locked
+                  Founding 50: ${plan.foundingPrice}/mo for 12 months
                 </p>
               ) : null}
               <p className="mt-4 text-sm text-paper/65">{plan.blurb}</p>
               <ul className="mt-6 space-y-2 text-sm text-paper/80">
-                <li>{plan.xRuns} X runs / month</li>
-                <li>{plan.seoRuns} SEO briefs / month</li>
                 {plan.bots.map((b) => (
                   <li key={b}>{b}</li>
                 ))}
@@ -81,22 +82,50 @@ export default function PricingPage() {
                 href="/start"
                 className="mt-8 inline-block bg-lime px-4 py-2 text-xs font-extrabold uppercase tracking-widest text-void"
               >
-                {plan.id === "free" ? "Open a pit" : "Start, then upgrade"}
+                {plan.id === "free" ? "Start free" : "Start free, then upgrade"}
               </Link>
             </article>
           ))}
         </div>
+
+        <section className="mt-16 overflow-x-auto border border-line">
+          <p className="border-b border-line px-4 py-3 font-mono text-[11px] uppercase tracking-widest text-mute">
+            Side by side
+          </p>
+          <table className="w-full min-w-[36rem] text-left text-sm">
+            <thead className="bg-ink-2 font-mono text-[11px] uppercase tracking-widest text-mute">
+              <tr>
+                <th className="px-4 py-3 font-medium"> </th>
+                <th className="px-4 py-3 font-medium">Free</th>
+                <th className="px-4 py-3 font-medium text-lime">Desk</th>
+                <th className="px-4 py-3 font-medium">Floor</th>
+              </tr>
+            </thead>
+            <tbody>
+              {PLAN_COMPARE.map((row) => (
+                <tr key={row.label} className="border-t border-line">
+                  <td className="px-4 py-3 text-paper/70">{row.label}</td>
+                  <td className="px-4 py-3">{row.free}</td>
+                  <td className="px-4 py-3">{row.desk}</td>
+                  <td className="px-4 py-3">{row.floor}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
 
         <section className="mt-16 max-w-lg border border-line bg-ink-2 p-6 glow-cyan">
           <p className="font-mono text-[11px] uppercase tracking-widest text-mute">
             Founding 50
           </p>
           <h2 className="mt-3 font-display text-3xl font-extrabold tracking-tight">
-            Lock Desk at $19 before billing opens.
+            Lock Desk at $19/mo for a year.
           </h2>
           <p className="mt-3 text-sm text-paper/65">
-            No charge today. We email you when Stripe is live. The $19 rate
-            holds for 12 months. After 50, Desk is $39.
+            Monthly, not one-time. No charge today. We email you when Stripe is
+            live. After 12 months — or if the 50 slots fill — Desk is $39/mo.
+            Floor stays $99/mo and includes every current desk plus Video and
+            Ads when they launch.
           </p>
           {done ? (
             <p className="mt-6 text-sm text-lime">
