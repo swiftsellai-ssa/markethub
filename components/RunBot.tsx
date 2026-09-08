@@ -120,7 +120,7 @@ export function RunBot() {
         type="button"
         onClick={run}
         disabled={busy || hasKey === false || xRunsLeft <= 0 || !sessionUser}
-        className="rounded-sm bg-lime px-4 py-2 text-xs font-medium uppercase tracking-widest text-ink disabled:cursor-not-allowed disabled:opacity-40"
+        className="bg-lime px-4 py-2 text-xs font-extrabold uppercase tracking-widest text-void disabled:cursor-not-allowed disabled:opacity-40"
       >
         {busy ? "Researching X…" : `Run X bot · ${xRunsLeft} left`}
       </button>

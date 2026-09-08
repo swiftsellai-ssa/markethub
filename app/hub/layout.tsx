@@ -36,7 +36,7 @@ export default function HubLayout({ children }: { children: React.ReactNode }) {
             <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-cyan">
               {ready ? state.account.plan : ""}
             </p>
-            <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.18em]">
+            <div className="mt-2 font-mono text-[10px] tracking-[0.04em]">
               <AuthNav compact />
             </div>
           </div>

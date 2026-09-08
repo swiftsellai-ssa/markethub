@@ -23,7 +23,7 @@ export function CopyButton({
     <button
       type="button"
       onClick={onCopy}
-      className={`inline-flex items-center justify-center rounded-sm border px-3 py-1.5 text-xs font-medium tracking-wide uppercase ${className}`}
+      className={`inline-flex items-center justify-center border px-3 py-1.5 text-xs font-extrabold uppercase tracking-wide ${className}`}
     >
       {copied ? "Copied" : label}
     </button>

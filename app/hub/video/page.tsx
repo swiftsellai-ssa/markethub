@@ -5,7 +5,7 @@ export default function VideoPage() {
     <ComingDesk
       id="02"
       week="Week 3"
-      name="Video Bot"
+      name="Video desk"
       loop="Research trending topics. Write 45–60s scripts. Render. Post. Read watch-through. Clone the hook that won."
       modes={[
         "Research: X, TikTok, Reels in the niche — hook formats, length, comment heat.",

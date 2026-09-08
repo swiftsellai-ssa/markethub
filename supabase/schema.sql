@@ -56,24 +56,44 @@ create policy "founding_leads_insert"
   on public.founding_leads for insert
   with check (true);
 
+-- SECURITY DEFINER + empty search_path so supabase_auth_admin signup
+-- can write public.workspaces. Never raise — Auth must not roll back.
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
 security definer
-set search_path = public
+set search_path = ''
 as $$
 begin
   insert into public.workspaces (user_id)
   values (new.id)
   on conflict (user_id) do nothing;
   return new;
+exception
+  when others then
+    raise warning 'marketsxhub handle_new_user: %', sqlerrm;
+    return new;
 end;
 $$;
+
+alter function public.handle_new_user() owner to postgres;
+
+revoke all on function public.handle_new_user() from public;
+grant execute on function public.handle_new_user() to supabase_auth_admin, postgres;
 
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
+
+grant usage on schema public to supabase_auth_admin;
+grant insert, select on table public.workspaces to supabase_auth_admin;
+
+drop policy if exists "auth_admin_insert_workspaces" on public.workspaces;
+create policy "auth_admin_insert_workspaces"
+  on public.workspaces for insert
+  to supabase_auth_admin
+  with check (true);
 
 create or replace function public.plan_limits(p text)
 returns table (x_limit integer, seo_limit integer)

@@ -71,14 +71,14 @@ export default function BrandPage() {
         <div className="flex flex-wrap gap-3 pt-2">
           <button
             type="submit"
-            className="rounded-sm bg-lime px-4 py-2 text-xs font-medium uppercase tracking-widest text-ink"
+            className="bg-lime px-4 py-2 text-xs font-extrabold uppercase tracking-widest text-void"
           >
             {saved ? "Saved" : "Save brand"}
           </button>
           <button
             type="button"
             onClick={reset}
-            className="rounded-sm border border-line px-4 py-2 text-xs font-medium uppercase tracking-widest text-mute"
+            className="border border-line px-4 py-2 text-xs font-extrabold uppercase tracking-widest text-mute"
           >
             Reset demo data
           </button>

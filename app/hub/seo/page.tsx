@@ -93,7 +93,7 @@ export default function SeoBotPage() {
           type="button"
           onClick={run}
           disabled={busy || hasKey === false || seoRunsLeft <= 0 || !sessionUser}
-          className="rounded-sm bg-lime px-4 py-2 text-xs font-medium uppercase tracking-widest text-ink disabled:opacity-40"
+          className="bg-lime px-4 py-2 text-xs font-extrabold uppercase tracking-widest text-void disabled:opacity-40"
         >
           {busy ? "Searching…" : "Write one page"}
         </button>

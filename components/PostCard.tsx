@@ -95,7 +95,7 @@ export function PostCard({
                 <button
                   type="button"
                   onClick={() => onStatus("posted")}
-                  className="rounded-sm border border-line px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest text-paper/80"
+                  className=" border border-line px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest text-paper/80"
                 >
                   Mark posted
                 </button>
@@ -104,7 +104,7 @@ export function PostCard({
                 <button
                   type="button"
                   onClick={() => onStatus("skipped")}
-                  className="rounded-sm border border-line px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest text-mute"
+                  className=" border border-line px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest text-mute"
                 >
                   Skip
                 </button>
@@ -113,7 +113,7 @@ export function PostCard({
                 <button
                   type="button"
                   onClick={() => onStatus("ready")}
-                  className="rounded-sm border border-line px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest text-mute"
+                  className=" border border-line px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest text-mute"
                 >
                   Ready
                 </button>
@@ -172,7 +172,7 @@ function MetricsFields({
       <Field label="Reposts" value={reposts} onChange={setReposts} />
       <button
         type="submit"
-        className="self-end rounded-sm border border-line px-3 py-2 font-mono text-[11px] uppercase tracking-widest text-paper"
+        className="self-end  border border-line px-3 py-2 font-mono text-[11px] uppercase tracking-widest text-paper"
       >
         Log metrics
       </button>

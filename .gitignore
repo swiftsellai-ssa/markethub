@@ -10,3 +10,5 @@ next-env.d.ts
 data/*.tsv
 
 .vercel
+
+.improvements.md

@@ -5,7 +5,7 @@ export default function AdsPage() {
     <ComingDesk
       id="04"
       week="Week 4"
-      name="Ads Bot"
+      name="Ads desk"
       loop="Read competitor ads that have been running 30+ days. Generate creatives. Launch paused. Kill zero-conversion spend. Scale winners 20%."
       modes={[
         "Research: longest-running competitor ads — hook, visual, CTA, pain point.",

@@ -25,7 +25,7 @@ export default function XBotPage() {
           <p className="mt-3 max-w-xl text-sm text-paper/65">
             Writing for {state.brand.name || "your brand"}. {weekdayName(today)}{" "}
             is a {contentTypeLabel(todayType).toLowerCase()} day. Copy the post,
-            ship it, log numbers so the 2x rule has something to chew on.
+            ship it, paste X metrics in seconds. Automatic tracking is coming.
           </p>
         </div>
         <RunBot />

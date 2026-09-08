@@ -15,9 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MarketsXHub — AI growth OS that scales what works",
+  title: "MarketsXHub — Stop guessing what content works",
   description:
-    "MarketsXHub is an AI growth operating system that tests content, tracks performance, and scales 2× outliers. X and SEO desks are live.",
+    "MarketsXHub runs one AI growth experiment at a time, tracks the result, and turns your 2× winners into the next baseline. X and SEO desks are live.",
   icons: { icon: "/favicon.svg" },
 };
 

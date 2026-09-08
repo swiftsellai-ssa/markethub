@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DeskTerminal } from "@/components/DeskTerminal";
 import { MarketingHeader } from "@/components/MarketingHeader";
 import { Shell } from "@/components/Shell";
 import { Ticker } from "@/components/Ticker";
@@ -8,26 +9,30 @@ const BOTS = [
   {
     id: "01",
     name: "SEO",
-    status: "Live",
-    line: "Finds one winnable keyword and writes the page. You publish it.",
+    status: "Live" as const,
+    purpose: "Find a winnable keyword. AI writes one page. You publish it.",
+    href: "/hub/seo",
   },
   {
     id: "02",
     name: "Video",
-    status: "Coming",
-    line: "Scripts from what's trending. Rendering comes with this desk.",
+    status: "Coming" as const,
+    purpose: "Trend → script → render. Same voice on every platform.",
+    href: "/hub/video",
   },
   {
     id: "03",
     name: "X",
-    status: "Live",
-    line: "Reads 48 hours of your niche. Writes one post. Clones 2× winners.",
+    status: "Live" as const,
+    purpose: "Research the last 48 hours. One post. Clone 2× winners.",
+    href: "/hub/x",
   },
   {
     id: "04",
     name: "Ads",
-    status: "Coming",
-    line: "Builds creatives from long-running competitor ads. Spend stays paused until you say go.",
+    status: "Coming" as const,
+    purpose: "Long-running competitor ads in. Creatives out. Spend stays paused.",
+    href: "/hub/ads",
   },
 ];
 
@@ -39,22 +44,20 @@ export default function LandingPage() {
 
       <main>
         <section className="relative px-5 pb-16 pt-12 md:px-10 md:pt-16">
-          <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.32em] text-cyan">
+          <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.28em] text-cyan">
             <span className="live-dot" />
-            X and SEO live · video and ads next · you still hit publish
+            Find the signal. Kill the noise. Scale the winners.
           </p>
-          <h1 className="mt-6 font-display text-[12vw] font-extrabold leading-[0.82] tracking-[-0.05em] md:text-[8.5rem]">
-            Markets<span className="text-lime">X</span>Hub
+          <h1 className="mt-6 max-w-4xl font-display text-5xl font-extrabold leading-[0.95] tracking-[-0.04em] md:text-7xl">
+            Stop guessing what content works.
           </h1>
           <p className="mt-8 max-w-2xl text-xl leading-snug text-paper md:text-2xl">
-            MarketsXHub is an AI growth operating system that tests content,
-            tracks performance, and scales what works.
+            MarketsXHub runs one AI growth experiment at a time, tracks the
+            result, and turns your 2× winners into the next baseline.
           </p>
           <p className="mt-4 max-w-xl text-paper/60">
-            Four desks — SEO, video, X, ads. Each one researches, writes one
-            piece, waits for the number, then clones anything that hits{" "}
-            <strong className="text-paper">2× your average engagement</strong>.
-            Point it at your brand. It does not write as us.
+            It learns your voice — not ours. You still hit publish. We keep the
+            scoreboard.
           </p>
           <div className="mt-10 flex flex-wrap items-center gap-4">
             <Link
@@ -84,35 +87,23 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="grid border-b border-line md:grid-cols-4">
-          {BOTS.map((bot) => (
-            <article
-              key={bot.id}
-              className={`border-line px-5 py-8 md:border-r md:last:border-r-0 ${
-                bot.status === "Live" ? "bg-ink-2 glow-lime" : "bg-void"
-              }`}
-            >
-              <div className="flex items-baseline justify-between gap-3 font-mono text-[11px] uppercase tracking-widest">
-                <span className="text-mute">{bot.id}</span>
-                <span
-                  className={bot.status === "Live" ? "text-lime" : "text-mute"}
-                >
-                  {bot.status === "Live" ? "● live" : "coming"}
-                </span>
-              </div>
-              <h2 className="mt-6 font-display text-3xl font-bold tracking-tight">
-                {bot.name}
-              </h2>
-              <p className="mt-3 text-sm leading-relaxed text-paper/60">
-                {bot.line}
-              </p>
-            </article>
-          ))}
+        <section className="px-5 py-16 md:px-10">
+          <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-mute">
+            Four desks
+          </p>
+          <h2 className="mt-3 font-display text-3xl font-extrabold tracking-tight md:text-4xl">
+            Trading terminals for growth.
+          </h2>
+          <div className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            {BOTS.map((bot) => (
+              <DeskTerminal key={bot.id} {...bot} />
+            ))}
+          </div>
         </section>
 
         <section
           id="loop"
-          className="border-b border-line bg-ink-2 px-5 py-16 md:px-10"
+          className="border-y border-line bg-ink-2 px-5 py-16 md:px-10"
         >
           <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-hot">
             What 2× means
@@ -122,10 +113,9 @@ export default function LandingPage() {
             average engagement.
           </h2>
           <p className="mt-5 max-w-2xl text-paper/65">
-            Score = likes + replies × 2 + reposts × 3. We average the last posts
-            you logged. Hit 2× that number and the format becomes the template
-            for three new variations. Miss it and that format gets dropped.
-            Not clicks. Not revenue. Engagement you can paste from X tonight.
+            Score = likes + replies × 2 + reposts × 3. Paste your X metrics in
+            seconds. Automatic tracking is coming. Hit 2× your baseline and that
+            format becomes the next three experiments.
           </p>
           <Link
             href="/playbook/outlier-rule"
@@ -141,15 +131,15 @@ export default function LandingPage() {
               Not another generator
             </p>
             <h2 className="mt-4 font-display text-4xl font-extrabold leading-[0.95] tracking-tight md:text-5xl">
-              Generators dump content.
+              AI learns what works
               <br />
-              A desk keeps score.
+              for your brand.
             </h2>
             <p className="mt-5 text-paper/65">
-              Most AI marketing tools scrape, write, and spray. MarketsXHub
-              writes one piece, waits for the number, and clones only the 2×
-              outliers. You still hit publish. We still refuse to spend your ads
-              budget without a click.
+              Most tools dump content. MarketsXHub runs a controlled experiment,
+              measures engagement, and clones only the formats that beat your
+              normal baseline. You still hit publish. We still refuse to spend
+              your ads budget without a click.
             </p>
           </div>
           <div className="border border-line bg-ink-2 p-6 glow-cyan">
@@ -201,7 +191,7 @@ export default function LandingPage() {
       </main>
 
       <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-line px-5 py-6 font-mono text-[11px] tracking-[0.12em] text-mute md:px-10">
-        <span>MarketsXHub · four desks · one morning</span>
+        <span>MarketsXHub · find the signal · scale the winners</span>
         <Link href="/pricing" className="hover:text-lime">
           Founding 50 open
         </Link>

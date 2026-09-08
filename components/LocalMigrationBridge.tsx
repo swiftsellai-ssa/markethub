@@ -1,15 +1,16 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { ensureWorkspace } from "@/lib/ensure-workspace";
+import { checkAndMigrateLocalStorage } from "@/lib/migrate-local";
 import {
   createClient,
   isBrowserSupabaseConfigured,
 } from "@/lib/supabase/client";
-import { checkAndMigrateLocalStorage } from "@/lib/migrate-local";
 
 /**
- * Runs once inside the hub: if the user is signed in and still has a local
- * MarketsXHub queue, import it into their Supabase workspace.
+ * Runs once inside the hub: create workspace if missing, then migrate any
+ * leftover localStorage queue into Supabase.
  */
 export function LocalMigrationBridge() {
   const ran = useRef(false);
@@ -25,6 +26,11 @@ export function LocalMigrationBridge() {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) return;
+
+      const ensured = await ensureWorkspace(supabase, user);
+      if (!ensured.ok) {
+        console.warn("MarketsXHub: ensureWorkspace failed", ensured.error);
+      }
 
       const result = await checkAndMigrateLocalStorage(supabase, user);
       if (result.migrated) {
