@@ -16,19 +16,25 @@ const FIELDS: Array<{ key: keyof Brand; label: string; rows?: number }> = [
 ];
 
 export default function BrandPage() {
-  const { state, setBrand, reset } = useHub();
+  const { state, saveBrand, reset } = useHub();
   const [draft, setDraft] = useState<Brand>(state.brand);
-  const [saved, setSaved] = useState(false);
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     setDraft(state.brand);
   }, [state.brand]);
 
-  function save(e: React.FormEvent) {
+  async function save(e: React.FormEvent) {
     e.preventDefault();
-    setBrand(draft);
-    setSaved(true);
-    window.setTimeout(() => setSaved(false), 1600);
+    if (busy) return;
+    setBusy(true);
+    try {
+      await saveBrand(draft);
+    } catch {
+      // Toast already fired from saveBrand
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
@@ -38,8 +44,8 @@ export default function BrandPage() {
       </p>
       <h1 className="mt-3 font-display text-4xl font-extrabold tracking-tight">Brand</h1>
       <p className="mt-3 text-sm text-paper/65">
-        The X desk writes in this voice. Right now it is marketing MarketsXHub
-        to founders. Change it when you point the bots at another product.
+        The X and SEO desks write in this voice. Point it at your product, save,
+        and you will see a confirmation at the bottom of the screen.
       </p>
 
       <form onSubmit={save} className="mt-8 space-y-4">
@@ -71,9 +77,10 @@ export default function BrandPage() {
         <div className="flex flex-wrap gap-3 pt-2">
           <button
             type="submit"
-            className="bg-lime px-4 py-2 text-xs font-extrabold uppercase tracking-widest text-void"
+            disabled={busy}
+            className="bg-lime px-4 py-2 text-xs font-extrabold uppercase tracking-widest text-void disabled:opacity-40"
           >
-            {saved ? "Saved" : "Save brand"}
+            {busy ? "Saving…" : "Save brand"}
           </button>
           <button
             type="button"

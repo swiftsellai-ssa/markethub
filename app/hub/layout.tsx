@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AuthNav } from "@/components/AuthNav";
 import { Logo } from "@/components/Logo";
+import { Toast } from "@/components/Toast";
 import { useHub } from "@/lib/store";
 
 const NAV = [
@@ -22,6 +23,7 @@ export default function HubLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="noise min-h-screen bg-void text-paper hub-grid">
+      <Toast />
       <div className="flex min-h-screen flex-col md:flex-row">
         <aside className="border-b border-line bg-ink-2/80 md:w-56 md:border-b-0 md:border-r">
           <div className="flex items-center justify-between px-4 py-4 md:block">

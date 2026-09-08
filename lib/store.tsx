@@ -64,6 +64,10 @@ type HubContextValue = {
   requestFounding: (email: string) => void;
   reset: () => void;
   signOut: () => Promise<void>;
+  notice: string | null;
+  noticeError: boolean;
+  saveBrand: (brand: Brand) => Promise<void>;
+  clearNotice: () => void;
 };
 
 const HubContext = createContext<HubContextValue | null>(null);
@@ -93,6 +97,14 @@ function migrate(raw: unknown): HubState | null {
   };
 }
 
+function writeCloud(next: HubState, userId: string) {
+  const supabase = createClient();
+  return supabase
+    .from("workspaces")
+    .update(hubToWorkspacePatch(next))
+    .eq("user_id", userId);
+}
+
 function loadState(): HubState {
   if (typeof window === "undefined") return EMPTY_STATE;
   try {
@@ -115,6 +127,12 @@ export function HubProvider({ children }: { children: React.ReactNode }) {
   const [cloudHydrated, setCloudHydrated] = useState(false);
   const persistTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const skipPersist = useRef(true);
+  const stateRef = useRef(state);
+  const sessionRef = useRef(sessionUser);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [noticeError, setNoticeError] = useState(false);
+  stateRef.current = state;
+  sessionRef.current = sessionUser;
 
   useEffect(() => {
     const local = loadState();
@@ -169,17 +187,51 @@ export function HubProvider({ children }: { children: React.ReactNode }) {
     if (!ready || !sessionUser || !cloudHydrated || skipPersist.current) return;
     if (persistTimer.current) clearTimeout(persistTimer.current);
     persistTimer.current = setTimeout(() => {
-      if (!isBrowserSupabaseConfigured()) return;
-      const supabase = createClient();
-      void supabase
-        .from("workspaces")
-        .update(hubToWorkspacePatch(state))
-        .eq("user_id", sessionUser.id);
+      writeCloud(stateRef.current, sessionUser.id);
     }, 600);
     return () => {
-      if (persistTimer.current) clearTimeout(persistTimer.current);
+      if (persistTimer.current) {
+        clearTimeout(persistTimer.current);
+        persistTimer.current = null;
+        writeCloud(stateRef.current, sessionUser.id);
+      }
     };
   }, [ready, sessionUser, cloudHydrated, state]);
+
+  const clearNotice = useCallback(() => {
+    setNotice(null);
+    setNoticeError(false);
+  }, []);
+
+  const flash = useCallback((text: string, isError = false) => {
+    setNotice(text);
+    setNoticeError(isError);
+    window.setTimeout(() => {
+      setNotice(null);
+      setNoticeError(false);
+    }, 4200);
+  }, []);
+
+  const saveBrand = useCallback(
+    async (brand: Brand) => {
+      const next = { ...stateRef.current, brand };
+      stateRef.current = next;
+      setState(next);
+      const user = sessionRef.current;
+      if (user && isBrowserSupabaseConfigured()) {
+        const { error } = await writeCloud(next, user.id);
+        if (error) {
+          flash("Brand did not save to the server. Try again.", true);
+          throw error;
+        }
+        flash("Brand saved. X and SEO will use this voice.");
+        return;
+      }
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      flash("Brand saved on this device. Sign in to keep it everywhere.");
+    },
+    [flash],
+  );
 
   const setBrand = useCallback((brand: Brand) => {
     setState((s) => ({ ...s, brand }));
@@ -380,6 +432,10 @@ export function HubProvider({ children }: { children: React.ReactNode }) {
       requestFounding,
       reset,
       signOut,
+      notice,
+      noticeError,
+      saveBrand,
+      clearNotice,
     }),
     [
       ready,
@@ -403,6 +459,10 @@ export function HubProvider({ children }: { children: React.ReactNode }) {
       requestFounding,
       reset,
       signOut,
+      notice,
+      noticeError,
+      saveBrand,
+      clearNotice,
     ],
   );
 
