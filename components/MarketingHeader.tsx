@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AuthNav } from "./AuthNav";
 import { Logo } from "./Logo";
 
 export function MarketingHeader() {
@@ -17,6 +18,7 @@ export function MarketingHeader() {
         <Link href="/hub" className="text-mute hover:text-lime">
           Hub
         </Link>
+        <AuthNav />
         <Link
           href="/start"
           className="bg-lime px-4 py-2 font-bold text-void hover:bg-cyan"

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { xRunLimit } from "@/lib/plans";
 import { useHub } from "@/lib/store";
 import type { ContentType, PostKind, Research } from "@/lib/types";
 
@@ -15,17 +16,22 @@ type RunResponse = {
     contentType: ContentType;
   };
   strategyUpdate: string;
+  serverQuota?: boolean;
+  runsRemaining?: number | null;
+  error?: string;
 };
 
 export function RunBot() {
   const {
     state,
+    sessionUser,
     today,
     addPost,
     setResearch,
     setStrategy,
     xRunsLeft,
     consumeXRun,
+    setRunsUsed,
   } = useHub();
   const [hasKey, setHasKey] = useState<boolean | null>(null);
   const [busy, setBusy] = useState(false);
@@ -39,6 +45,10 @@ export function RunBot() {
   }, []);
 
   async function run() {
+    if (!sessionUser) {
+      setError("Sign in to run the X desk.");
+      return;
+    }
     if (xRunsLeft <= 0) {
       setError("No X runs left on this plan. Upgrade on /pricing.");
       return;
@@ -46,10 +56,11 @@ export function RunBot() {
     setBusy(true);
     setError(null);
     try {
-      const res = await fetch("/api/bots/x/run", {
+      const res = await fetch("/api/run-desk", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          deskType: "x",
           brand: state.brand,
           strategy: state.strategy,
           recentPosts: state.posts.slice(0, 10).map((p) => ({
@@ -62,7 +73,7 @@ export function RunBot() {
           })),
         }),
       });
-      const data = (await res.json()) as RunResponse & { error?: string };
+      const data = (await res.json()) as RunResponse;
       if (!res.ok) throw new Error(data.error || "Run failed");
 
       const research: Research = {
@@ -81,7 +92,14 @@ export function RunBot() {
         status: "ready",
         researchNotes: data.research.notes,
       });
-      consumeXRun();
+      // Keep local UI in sync; signed-in quota is also decremented in Postgres.
+      if (data.serverQuota && typeof data.runsRemaining === "number") {
+        setRunsUsed({
+          x: Math.max(xRunLimit(state.account.plan) - data.runsRemaining, 0),
+        });
+      } else {
+        consumeXRun();
+      }
       if (data.strategyUpdate) {
         setStrategy({
           ...state.strategy,
@@ -101,16 +119,22 @@ export function RunBot() {
       <button
         type="button"
         onClick={run}
-        disabled={busy || hasKey === false || xRunsLeft <= 0}
+        disabled={busy || hasKey === false || xRunsLeft <= 0 || !sessionUser}
         className="rounded-sm bg-lime px-4 py-2 text-xs font-medium uppercase tracking-widest text-ink disabled:cursor-not-allowed disabled:opacity-40"
       >
         {busy ? "Researching X…" : `Run X bot · ${xRunsLeft} left`}
       </button>
+      {!sessionUser ? (
+        <p className="max-w-xs text-right text-xs text-mute">
+          <a href="/login?next=/hub/x" className="text-cyan hover:text-lime">
+            Log in
+          </a>{" "}
+          to run the desk. Quota is per account, not per browser.
+        </p>
+      ) : null}
       {hasKey === false ? (
         <p className="max-w-xs text-right text-xs text-mute">
-          Add <code className="text-paper/70">XAI_API_KEY</code> to{" "}
-          <code className="text-paper/70">.env.local</code> to generate live.
-          Seeded demo drafts still ship.
+          Server is missing XAI_API_KEY. Seeded demo drafts still ship.
         </p>
       ) : null}
       {error ? <p className="max-w-xs text-right text-xs text-warn">{error}</p> : null}

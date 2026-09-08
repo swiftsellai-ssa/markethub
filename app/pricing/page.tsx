@@ -8,19 +8,50 @@ import { Ticker } from "@/components/Ticker";
 import { PLAN_COMPARE, PLANS } from "@/lib/plans";
 import { useHub } from "@/lib/store";
 
+type CheckoutTier = "desk" | "founding" | "floor";
+
 export default function PricingPage() {
   const { state, requestFounding } = useHub();
   const [email, setEmail] = useState(state.account.email);
   const [done, setDone] = useState(state.account.foundingRequested);
   const [error, setError] = useState<string | null>(null);
+  const [checkoutBusy, setCheckoutBusy] = useState<CheckoutTier | null>(null);
+
+  async function startCheckout(tier: CheckoutTier) {
+    setError(null);
+    setCheckoutBusy(tier);
+    try {
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tier }),
+      });
+      const data = (await res.json()) as {
+        url?: string;
+        error?: string;
+        code?: string;
+      };
+      if (res.status === 401 || data.code === "AUTH_REQUIRED") {
+        window.location.href = "/login?next=/pricing";
+        return;
+      }
+      if (!res.ok || !data.url) {
+        throw new Error(data.error || "Checkout unavailable");
+      }
+      window.location.href = data.url;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Checkout failed");
+      setCheckoutBusy(null);
+    }
+  }
 
   async function join(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    const res = await fetch("/api/founding", {
+    const res = await fetch("/api/founding-lead", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, source: "founding_50_modal" }),
     });
     const data = (await res.json()) as { error?: string };
     if (!res.ok) {
@@ -29,6 +60,7 @@ export default function PricingPage() {
     }
     requestFounding(email);
     setDone(true);
+    await startCheckout("founding");
   }
 
   return (
@@ -45,8 +77,7 @@ export default function PricingPage() {
         <p className="mt-4 max-w-xl text-paper/65">
           Founding 50 is <strong className="text-paper">$19 per month</strong>{" "}
           for Desk, locked for 12 months. After that — or after 50 people —
-          Desk is $39/mo. No one-time fee. No charge today; we email you when
-          billing opens.
+          Desk is $39/mo. Floor is $99/mo.
         </p>
 
         <div className="mt-12 grid gap-4 md:grid-cols-3">
@@ -78,12 +109,29 @@ export default function PricingPage() {
                   <li key={b}>{b}</li>
                 ))}
               </ul>
-              <Link
-                href="/start"
-                className="mt-8 inline-block bg-lime px-4 py-2 text-xs font-extrabold uppercase tracking-widest text-void"
-              >
-                {plan.id === "free" ? "Start free" : "Start free, then upgrade"}
-              </Link>
+              {plan.id === "free" ? (
+                <Link
+                  href="/start"
+                  className="mt-8 inline-block bg-lime px-4 py-2 text-xs font-extrabold uppercase tracking-widest text-void"
+                >
+                  Start free
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  disabled={checkoutBusy !== null}
+                  onClick={() =>
+                    startCheckout(plan.id === "floor" ? "floor" : "desk")
+                  }
+                  className="mt-8 bg-lime px-4 py-2 text-xs font-extrabold uppercase tracking-widest text-void disabled:opacity-40"
+                >
+                  {checkoutBusy === (plan.id === "floor" ? "floor" : "desk")
+                    ? "Redirecting…"
+                    : plan.id === "floor"
+                      ? "Subscribe Floor"
+                      : "Subscribe Desk"}
+                </button>
+              )}
             </article>
           ))}
         </div>
@@ -122,14 +170,14 @@ export default function PricingPage() {
             Lock Desk at $19/mo for a year.
           </h2>
           <p className="mt-3 text-sm text-paper/65">
-            Monthly, not one-time. No charge today. We email you when Stripe is
-            live. After 12 months — or if the 50 slots fill — Desk is $39/mo.
-            Floor stays $99/mo and includes every current desk plus Video and
-            Ads when they launch.
+            Monthly, not one-time. Same Desk quotas (90 X / 4 SEO). After 12
+            months — or if the 50 slots fill — Desk is $39/mo. Floor stays
+            $99/mo.
           </p>
-          {done ? (
+          {done && checkoutBusy !== "founding" ? (
             <p className="mt-6 text-sm text-lime">
-              You&apos;re on the list. Watch your inbox.
+              You&apos;re on the list. Watch your inbox if Checkout is still
+              warming up.
             </p>
           ) : (
             <form onSubmit={join} className="mt-6 flex flex-col gap-3 sm:flex-row">
@@ -143,13 +191,23 @@ export default function PricingPage() {
               />
               <button
                 type="submit"
-                className="bg-lime px-4 py-2 text-xs font-extrabold uppercase tracking-widest text-void"
+                disabled={checkoutBusy !== null}
+                className="bg-lime px-4 py-2 text-xs font-extrabold uppercase tracking-widest text-void disabled:opacity-40"
               >
-                Join founding 50
+                {checkoutBusy === "founding"
+                  ? "Opening Checkout…"
+                  : "Claim founding Desk"}
               </button>
             </form>
           )}
           {error ? <p className="mt-3 text-sm text-hot">{error}</p> : null}
+          <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.18em] text-mute">
+            Sign in first so Checkout can attach the subscription to your
+            workspace.{" "}
+            <Link href="/login" className="text-cyan hover:text-lime">
+              /login
+            </Link>
+          </p>
         </section>
       </main>
     </Shell>

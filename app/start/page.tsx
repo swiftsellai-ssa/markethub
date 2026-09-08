@@ -7,6 +7,10 @@ import { Shell } from "@/components/Shell";
 import { Ticker } from "@/components/Ticker";
 import { EMPTY_BRAND } from "@/lib/seed";
 import { useHub } from "@/lib/store";
+import {
+  createClient,
+  isBrowserSupabaseConfigured,
+} from "@/lib/supabase/client";
 import type { Brand } from "@/lib/types";
 
 export default function StartPage() {
@@ -14,9 +18,32 @@ export default function StartPage() {
   const { onboard, ready } = useHub();
   const [email, setEmail] = useState("");
   const [brand, setBrand] = useState<Brand>(EMPTY_BRAND);
+  const [checkEmail, setCheckEmail] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function go(demo: boolean) {
+  async function go(demo: boolean) {
+    setError(null);
     onboard({ brand, email, demo });
+    if (email.trim() && isBrowserSupabaseConfigured()) {
+      try {
+        const origin =
+          process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+        const supabase = createClient();
+        const { error: authError } = await supabase.auth.signInWithOtp({
+          email: email.trim().toLowerCase(),
+          options: { emailRedirectTo: `${origin.replace(/\/$/, "")}/hub` },
+        });
+        if (authError) throw authError;
+        setCheckEmail(true);
+        return;
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Workspace saved locally. Magic link failed — use Log in.",
+        );
+      }
+    }
     router.push("/hub/x");
   }
 
@@ -32,16 +59,21 @@ export default function StartPage() {
           Your product. Your bots.
         </h1>
         <p className="mt-3 text-sm text-paper/65">
-          Free: 7 X runs and 1 SEO brief. No card. The bots write for the brand
-          you type here — not for MarketsXHub.
+          Free: 7 X runs and 1 SEO brief. No card. Use a real email — we send a
+          magic link so the workspace persists and Generate can run.
         </p>
 
+        {checkEmail ? (
+          <p className="mt-8 text-lime">
+            Workspace saved. Check {email} for the magic link, then open the hub.
+          </p>
+        ) : (
         <form
           className="mt-8 space-y-4"
           onSubmit={(e) => {
             e.preventDefault();
-            if (!brand.name.trim() || !brand.niche.trim()) return;
-            go(false);
+            if (!email.trim() || !brand.name.trim() || !brand.niche.trim()) return;
+            void go(false);
           }}
         >
           <Field
@@ -49,6 +81,7 @@ export default function StartPage() {
             value={email}
             onChange={setEmail}
             type="email"
+            required
             placeholder="you@company.com"
           />
           <Field
@@ -106,13 +139,21 @@ export default function StartPage() {
             </button>
             <button
               type="button"
-              onClick={() => go(true)}
+              onClick={() => {
+                if (!email.trim()) {
+                  setError("Email is required so we can persist the workspace.");
+                  return;
+                }
+                void go(true);
+              }}
               className="border border-line px-5 py-3 text-sm text-paper/80 hover:border-lime hover:text-lime"
             >
               Load MarketsXHub demo
             </button>
           </div>
+          {error ? <p className="text-sm text-hot">{error}</p> : null}
         </form>
+        )}
       </main>
     </Shell>
   );

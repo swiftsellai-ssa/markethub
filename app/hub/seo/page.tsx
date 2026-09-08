@@ -8,7 +8,7 @@ import { PLANS } from "@/lib/plans";
 import type { Article } from "@/lib/types";
 
 export default function SeoBotPage() {
-  const { state, seoRunsLeft, addArticle, consumeSeoRun } = useHub();
+  const { state, sessionUser, seoRunsLeft, addArticle, consumeSeoRun } = useHub();
   const [hint, setHint] = useState("");
   const [hasKey, setHasKey] = useState<boolean | null>(null);
   const [busy, setBusy] = useState(false);
@@ -23,6 +23,10 @@ export default function SeoBotPage() {
   }, []);
 
   async function run() {
+    if (!sessionUser) {
+      setError("Sign in to run the SEO desk.");
+      return;
+    }
     if (seoRunsLeft <= 0) {
       setError("No SEO runs left on this plan. Upgrade on /pricing.");
       return;
@@ -30,14 +34,19 @@ export default function SeoBotPage() {
     setBusy(true);
     setError(null);
     try {
-      const res = await fetch("/api/bots/seo/run", {
+      const res = await fetch("/api/run-desk", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ brand: state.brand, hint }),
+        body: JSON.stringify({
+          deskType: "seo",
+          brand: state.brand,
+          hint,
+        }),
       });
       const data = (await res.json()) as Article & {
         error?: string;
         markdown?: string;
+        serverQuota?: boolean;
       };
       if (!res.ok) throw new Error(data.error || "Run failed");
       const article = addArticle({
@@ -83,19 +92,27 @@ export default function SeoBotPage() {
         <button
           type="button"
           onClick={run}
-          disabled={busy || hasKey === false || seoRunsLeft <= 0}
+          disabled={busy || hasKey === false || seoRunsLeft <= 0 || !sessionUser}
           className="rounded-sm bg-lime px-4 py-2 text-xs font-medium uppercase tracking-widest text-ink disabled:opacity-40"
         >
           {busy ? "Searching…" : "Write one page"}
         </button>
       </div>
+      {!sessionUser ? (
+        <p className="mt-3 text-xs text-mute">
+          <Link href="/login?next=/hub/seo" className="text-cyan hover:text-lime">
+            Log in
+          </Link>{" "}
+          to run SEO. Quota is per account.
+        </p>
+      ) : null}
       {hasKey === false ? (
         <p className="mt-3 text-xs text-mute">
-          Add XAI_API_KEY to generate. Meanwhile read the{" "}
+          Server is missing XAI_API_KEY. Read the{" "}
           <Link href="/playbook" className="underline">
             public playbook
           </Link>{" "}
-          — that is MarketsXHub&apos;s own SEO.
+          meanwhile.
         </p>
       ) : null}
       {error ? <p className="mt-3 text-sm text-warn">{error}</p> : null}

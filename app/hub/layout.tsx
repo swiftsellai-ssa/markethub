@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { AuthNav } from "@/components/AuthNav";
 import { Logo } from "@/components/Logo";
 import { useHub } from "@/lib/store";
 
@@ -32,6 +33,12 @@ export default function HubLayout({ children }: { children: React.ReactNode }) {
                 ? state.brand.name || "Workspace"
                 : "Workspace"}
             </p>
+            <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-cyan">
+              {ready ? state.account.plan : ""}
+            </p>
+            <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.18em]">
+              <AuthNav compact />
+            </div>
           </div>
           <nav className="flex gap-1 overflow-x-auto px-2 pb-3 md:flex-col md:px-3 md:pb-6">
             {NAV.map((item) => {

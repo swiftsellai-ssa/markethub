@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { EMPTY_STATE, SEED_STATE } from "./seed";
@@ -13,6 +14,16 @@ import { strategyFromPosts } from "./outliers";
 import { newId } from "./format";
 import { todayISO } from "./calendar";
 import { seoRunLimit, xRunLimit } from "./plans";
+import {
+  createClient,
+  isBrowserSupabaseConfigured,
+} from "@/lib/supabase/client";
+import { checkAndMigrateLocalStorage } from "@/lib/migrate-local";
+import {
+  hubToWorkspacePatch,
+  workspaceToHub,
+  type WorkspaceRow,
+} from "@/lib/workspace-map";
 import type {
   Account,
   Article,
@@ -27,9 +38,12 @@ import type {
 const STORAGE_KEY = "marketsxhub.v1";
 const LEGACY_KEY = "markethub.v2";
 
+export type SessionUser = { id: string; email: string };
+
 type HubContextValue = {
   ready: boolean;
   state: HubState;
+  sessionUser: SessionUser | null;
   today: string;
   todayPost: Post | undefined;
   xRunsLeft: number;
@@ -45,9 +59,11 @@ type HubContextValue = {
   logMetrics: (id: string, metrics: Omit<Metrics, "loggedAt">) => void;
   consumeXRun: () => void;
   consumeSeoRun: () => void;
+  setRunsUsed: (input: { x?: number; seo?: number }) => void;
   onboard: (input: { brand: Brand; email: string; demo?: boolean }) => void;
   requestFounding: (email: string) => void;
   reset: () => void;
+  signOut: () => Promise<void>;
 };
 
 const HubContext = createContext<HubContextValue | null>(null);
@@ -61,7 +77,7 @@ function migrate(raw: unknown): HubState | null {
   if (!parsed.brand || !Array.isArray(parsed.posts)) return null;
   const account: Account = {
     email: parsed.account?.email ?? "",
-    plan: parsed.account?.plan ?? "desk",
+    plan: parsed.account?.plan ?? "free",
     onboarded: parsed.account?.onboarded ?? true,
     foundingRequested: parsed.account?.foundingRequested ?? false,
     xRunsUsed: parsed.account?.xRunsUsed ?? 0,
@@ -95,16 +111,75 @@ function loadState(): HubState {
 export function HubProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<HubState>(EMPTY_STATE);
   const [ready, setReady] = useState(false);
+  const [sessionUser, setSessionUser] = useState<SessionUser | null>(null);
+  const [cloudHydrated, setCloudHydrated] = useState(false);
+  const persistTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const skipPersist = useRef(true);
 
   useEffect(() => {
-    setState(loadState());
-    setReady(true);
+    const local = loadState();
+    setState(local);
+
+    if (!isBrowserSupabaseConfigured()) {
+      setReady(true);
+      skipPersist.current = false;
+      return;
+    }
+
+    const supabase = createClient();
+    void (async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        setSessionUser(null);
+        setReady(true);
+        skipPersist.current = false;
+        return;
+      }
+
+      setSessionUser({ id: user.id, email: user.email ?? "" });
+      await checkAndMigrateLocalStorage(supabase, user);
+
+      const { data: row } = await supabase
+        .from("workspaces")
+        .select(
+          "id, user_id, plan, brand, strategy, research, posts, articles, x_runs_used, seo_runs_used, founding",
+        )
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (row) {
+        setState(workspaceToHub(row as WorkspaceRow, user.email ?? ""));
+      }
+      setCloudHydrated(true);
+      setReady(true);
+      skipPersist.current = false;
+    })();
   }, []);
 
   useEffect(() => {
     if (!ready) return;
+    if (sessionUser) return;
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }, [ready, state]);
+  }, [ready, sessionUser, state]);
+
+  useEffect(() => {
+    if (!ready || !sessionUser || !cloudHydrated || skipPersist.current) return;
+    if (persistTimer.current) clearTimeout(persistTimer.current);
+    persistTimer.current = setTimeout(() => {
+      if (!isBrowserSupabaseConfigured()) return;
+      const supabase = createClient();
+      void supabase
+        .from("workspaces")
+        .update(hubToWorkspacePatch(state))
+        .eq("user_id", sessionUser.id);
+    }, 600);
+    return () => {
+      if (persistTimer.current) clearTimeout(persistTimer.current);
+    };
+  }, [ready, sessionUser, cloudHydrated, state]);
 
   const setBrand = useCallback((brand: Brand) => {
     setState((s) => ({ ...s, brand }));
@@ -192,6 +267,17 @@ export function HubProvider({ children }: { children: React.ReactNode }) {
     }));
   }, []);
 
+  const setRunsUsed = useCallback((input: { x?: number; seo?: number }) => {
+    setState((s) => ({
+      ...s,
+      account: {
+        ...s.account,
+        xRunsUsed: input.x ?? s.account.xRunsUsed,
+        seoRunsUsed: input.seo ?? s.account.seoRunsUsed,
+      },
+    }));
+  }, []);
+
   const onboard = useCallback(
     (input: { brand: Brand; email: string; demo?: boolean }) => {
       if (input.demo) {
@@ -201,7 +287,7 @@ export function HubProvider({ children }: { children: React.ReactNode }) {
             ...SEED_STATE.account,
             email: input.email,
             onboarded: true,
-            plan: "desk",
+            plan: "free",
           },
         });
         return;
@@ -246,6 +332,14 @@ export function HubProvider({ children }: { children: React.ReactNode }) {
     setState(EMPTY_STATE);
   }, []);
 
+  const signOut = useCallback(async () => {
+    if (isBrowserSupabaseConfigured()) {
+      await createClient().auth.signOut();
+    }
+    setSessionUser(null);
+    setCloudHydrated(false);
+  }, []);
+
   const today = todayISO();
   const todayPost = useMemo(
     () =>
@@ -267,6 +361,7 @@ export function HubProvider({ children }: { children: React.ReactNode }) {
     () => ({
       ready,
       state,
+      sessionUser,
       today,
       todayPost,
       xRunsLeft,
@@ -280,13 +375,16 @@ export function HubProvider({ children }: { children: React.ReactNode }) {
       logMetrics,
       consumeXRun,
       consumeSeoRun,
+      setRunsUsed,
       onboard,
       requestFounding,
       reset,
+      signOut,
     }),
     [
       ready,
       state,
+      sessionUser,
       today,
       todayPost,
       xRunsLeft,
@@ -300,9 +398,11 @@ export function HubProvider({ children }: { children: React.ReactNode }) {
       logMetrics,
       consumeXRun,
       consumeSeoRun,
+      setRunsUsed,
       onboard,
       requestFounding,
       reset,
+      signOut,
     ],
   );
 
