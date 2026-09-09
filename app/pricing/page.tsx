@@ -7,6 +7,7 @@ import { Shell } from "@/components/Shell";
 import { Ticker } from "@/components/Ticker";
 import { PLAN_COMPARE, PLANS } from "@/lib/plans";
 import { useHub } from "@/lib/store";
+import { track } from "@/lib/track";
 
 type CheckoutTier = "desk" | "founding" | "floor";
 
@@ -38,6 +39,7 @@ export default function PricingPage() {
       if (!res.ok || !data.url) {
         throw new Error(data.error || "Checkout unavailable");
       }
+      track("checkout_started", { tier });
       window.location.href = data.url;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Checkout failed");
@@ -60,6 +62,7 @@ export default function PricingPage() {
     }
     requestFounding(email);
     setDone(true);
+    track("founding_claimed");
     await startCheckout("founding");
   }
 

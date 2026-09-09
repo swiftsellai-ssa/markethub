@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { xRunLimit } from "@/lib/plans";
 import { useHub } from "@/lib/store";
+import { track } from "@/lib/track";
 import type { ContentType, PostKind, Research } from "@/lib/types";
 
 type RunResponse = {
@@ -74,7 +75,11 @@ export function RunBot() {
         }),
       });
       const data = (await res.json()) as RunResponse;
-      if (!res.ok) throw new Error(data.error || "Run failed");
+      if (!res.ok) {
+        track("desk_run_failed", { desk: "x" });
+        throw new Error(data.error || "Run failed");
+      }
+      track("desk_run", { desk: "x" });
 
       const research: Research = {
         ...data.research,

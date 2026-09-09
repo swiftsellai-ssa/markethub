@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { DeskTerminal } from "@/components/DeskTerminal";
 import { MarketingHeader } from "@/components/MarketingHeader";
+import { TrackLink } from "@/components/TrackLink";
 import { Shell } from "@/components/Shell";
 import { Ticker } from "@/components/Ticker";
 import { Workflow } from "@/components/Workflow";
@@ -60,18 +61,22 @@ export default function LandingPage() {
             scoreboard.
           </p>
           <div className="mt-10 flex flex-wrap items-center gap-4">
-            <Link
+            <TrackLink
               href="/start"
+              event="cta_start_free"
+              eventProps={{ location: "hero" }}
               className="bg-lime px-6 py-3 text-sm font-extrabold uppercase tracking-widest text-void hover:bg-cyan"
             >
               Start free — 7 X runs
-            </Link>
-            <Link
+            </TrackLink>
+            <TrackLink
               href="/pricing"
+              event="cta_pricing"
+              eventProps={{ location: "hero" }}
               className="font-mono text-[11px] uppercase tracking-[0.22em] text-mute hover:text-lime"
             >
               Desk $39/mo · founding 50 at $19/mo
-            </Link>
+            </TrackLink>
           </div>
         </section>
 
@@ -181,12 +186,14 @@ export default function LandingPage() {
             Two minutes to point MarketsXHub at any product. Or load the demo
             and see how we run the same loop on ourselves.
           </p>
-          <Link
+          <TrackLink
             href="/start"
+            event="cta_start_free"
+            eventProps={{ location: "footer_cta" }}
             className="mt-8 inline-block bg-lime px-6 py-3 text-sm font-extrabold uppercase tracking-widest text-void hover:bg-cyan"
           >
             Create a workspace
-          </Link>
+          </TrackLink>
         </section>
       </main>
 

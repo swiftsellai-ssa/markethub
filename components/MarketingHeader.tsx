@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AuthNav } from "./AuthNav";
 import { Logo } from "./Logo";
+import { TrackLink } from "./TrackLink";
 
 export function MarketingHeader() {
   return (
@@ -30,12 +31,14 @@ export function MarketingHeader() {
         <span className="normal-case tracking-normal">
           <AuthNav />
         </span>
-        <Link
+        <TrackLink
           href="/start"
+          event="cta_start_free"
+          eventProps={{ location: "nav" }}
           className="bg-lime px-3 py-2 font-bold uppercase tracking-[0.18em] text-void hover:bg-cyan sm:px-4"
         >
           Start free
-        </Link>
+        </TrackLink>
       </nav>
     </header>
   );

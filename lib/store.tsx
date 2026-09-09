@@ -19,6 +19,7 @@ import {
   isBrowserSupabaseConfigured,
 } from "@/lib/supabase/client";
 import { checkAndMigrateLocalStorage } from "@/lib/migrate-local";
+import { track } from "@/lib/track";
 import {
   hubToWorkspacePatch,
   workspaceToHub,
@@ -225,10 +226,12 @@ export function HubProvider({ children }: { children: React.ReactNode }) {
           throw error;
         }
         flash("Brand saved. X and SEO will use this voice.");
+        track("brand_saved");
         return;
       }
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
       flash("Brand saved on this device. Sign in to keep it everywhere.");
+      track("brand_saved", { local: true });
     },
     [flash],
   );
@@ -301,6 +304,7 @@ export function HubProvider({ children }: { children: React.ReactNode }) {
           strategy: strategyFromPosts(posts, s.strategy),
         };
       });
+      track("metrics_logged");
     },
     [],
   );

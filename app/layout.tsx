@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Geist_Mono, Syne } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { HubProvider } from "@/lib/store";
 import "./globals.css";
 
@@ -28,6 +30,8 @@ export default function RootLayout({
     <html lang="en" className={`${syne.variable} ${geistMono.variable}`}>
       <body className="font-sans antialiased">
         <HubProvider>{children}</HubProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

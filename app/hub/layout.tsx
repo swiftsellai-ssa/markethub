@@ -15,6 +15,7 @@ const NAV = [
   { href: "/hub/ads", label: "Ads", live: false },
   { href: "/hub/brand", label: "Brand", live: false },
   { href: "/hub/report", label: "Report", live: false },
+  { href: "/hub/insights", label: "Insights", live: false },
 ];
 
 export default function HubLayout({ children }: { children: React.ReactNode }) {

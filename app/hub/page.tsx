@@ -1,8 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useRef } from "react";
 import { DeskTerminal } from "@/components/DeskTerminal";
 import { useHub } from "@/lib/store";
+import { track } from "@/lib/track";
 import { averageScore, outliers, scoredPosts } from "@/lib/outliers";
 import { contentTypeLabel, weekdayName } from "@/lib/calendar";
 import { shortDate } from "@/lib/format";
@@ -38,7 +41,28 @@ const DESKS = [
   },
 ];
 
+function CheckoutBeacon() {
+  const params = useSearchParams();
+  const sent = useRef(false);
+  useEffect(() => {
+    if (sent.current) return;
+    if (params.get("checkout") !== "success") return;
+    sent.current = true;
+    track("checkout_success");
+  }, [params]);
+  return null;
+}
+
 export default function HubOverview() {
+  return (
+    <Suspense>
+      <CheckoutBeacon />
+      <HubOverviewBody />
+    </Suspense>
+  );
+}
+
+function HubOverviewBody() {
   const { state, today, todayPost } = useHub();
   const posted = scoredPosts(state.posts);
   const wins = outliers(state.posts);

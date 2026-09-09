@@ -11,6 +11,7 @@ import {
   createClient,
   isBrowserSupabaseConfigured,
 } from "@/lib/supabase/client";
+import { track } from "@/lib/track";
 import type { Brand } from "@/lib/types";
 
 export default function StartPage() {
@@ -24,6 +25,7 @@ export default function StartPage() {
   async function go(demo: boolean) {
     setError(null);
     onboard({ brand, email, demo });
+    track("workspace_created", { demo });
     if (email.trim() && isBrowserSupabaseConfigured()) {
       try {
         const origin =
@@ -34,6 +36,7 @@ export default function StartPage() {
           options: { emailRedirectTo: `${origin.replace(/\/$/, "")}/hub` },
         });
         if (authError) throw authError;
+        track("magic_link_sent", { source: "start" });
         setCheckEmail(true);
         return;
       } catch (err) {

@@ -9,6 +9,7 @@ import {
   createClient,
   isBrowserSupabaseConfigured,
 } from "@/lib/supabase/client";
+import { track } from "@/lib/track";
 
 function LoginForm() {
   const searchParams = useSearchParams();
@@ -39,6 +40,7 @@ function LoginForm() {
         },
       });
       if (authError) throw authError;
+      track("magic_link_sent", { source: "login" });
       setSent(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not send magic link");

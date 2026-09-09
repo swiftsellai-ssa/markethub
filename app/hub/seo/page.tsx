@@ -5,6 +5,7 @@ import Link from "next/link";
 import { CopyButton } from "@/components/CopyButton";
 import { useHub } from "@/lib/store";
 import { PLANS } from "@/lib/plans";
+import { track } from "@/lib/track";
 import type { Article } from "@/lib/types";
 
 export default function SeoBotPage() {
@@ -48,7 +49,11 @@ export default function SeoBotPage() {
         markdown?: string;
         serverQuota?: boolean;
       };
-      if (!res.ok) throw new Error(data.error || "Run failed");
+      if (!res.ok) {
+        track("desk_run_failed", { desk: "seo" });
+        throw new Error(data.error || "Run failed");
+      }
+      track("desk_run", { desk: "seo" });
       const article = addArticle({
         keyword: data.keyword,
         title: data.title,
