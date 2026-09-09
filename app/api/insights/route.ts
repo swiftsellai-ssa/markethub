@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { canViewInsights, insightsConfigured } from "@/lib/insights-access";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { isServiceRoleConfigured, isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(req: Request) {
@@ -15,10 +17,36 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Sign in required" }, { status: 401 });
   }
 
+  if (!insightsConfigured()) {
+    return NextResponse.json(
+      {
+        error: "Insights is locked. Set INSIGHTS_ALLOWED_EMAILS.",
+        code: "INSIGHTS_UNCONFIGURED",
+        rows: [],
+      },
+      { status: 403 },
+    );
+  }
+
+  if (!canViewInsights(user.email)) {
+    return NextResponse.json(
+      { error: "Insights is operator-only.", code: "INSIGHTS_FORBIDDEN", rows: [] },
+      { status: 403 },
+    );
+  }
+
+  if (!isServiceRoleConfigured()) {
+    return NextResponse.json(
+      { error: "Missing service role", rows: [] },
+      { status: 503 },
+    );
+  }
+
   const days = Number(new URL(req.url).searchParams.get("days") ?? "7");
   const windowDays = [7, 30, 90].includes(days) ? days : 7;
 
-  const { data, error } = await supabase.rpc("analytics_funnel", {
+  const admin = createAdminClient();
+  const { data, error } = await admin.rpc("analytics_funnel", {
     days: windowDays,
   });
 

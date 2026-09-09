@@ -5,10 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { FormEvent, Suspense, useState } from "react";
 import { MarketingHeader } from "@/components/MarketingHeader";
 import { Shell } from "@/components/Shell";
-import {
-  createClient,
-  isBrowserSupabaseConfigured,
-} from "@/lib/supabase/client";
+import { isBrowserSupabaseConfigured } from "@/lib/supabase/client";
 import { track } from "@/lib/track";
 
 function LoginForm() {
@@ -29,17 +26,17 @@ function LoginForm() {
     }
     setBusy(true);
     try {
-      const origin =
-        process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
-      const redirect = `${origin.replace(/\/$/, "")}${next.startsWith("/") ? next : "/hub"}`;
-      const supabase = createClient();
-      const { error: authError } = await supabase.auth.signInWithOtp({
-        email: email.trim().toLowerCase(),
-        options: {
-          emailRedirectTo: redirect,
-        },
+      const res = await fetch("/api/auth/magic-link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: email.trim().toLowerCase(),
+          next,
+          source: "login",
+        }),
       });
-      if (authError) throw authError;
+      const data = (await res.json()) as { error?: string };
+      if (!res.ok) throw new Error(data.error || "Could not send magic link");
       track("magic_link_sent", { source: "login" });
       setSent(true);
     } catch (err) {

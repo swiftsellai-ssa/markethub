@@ -4,6 +4,7 @@ import { useState } from "react";
 import { CopyButton } from "./CopyButton";
 import { contentTypeLabel } from "@/lib/calendar";
 import { charCount, copyText, shortDate, tweetOverLimit } from "@/lib/format";
+import { nonNegativeInt } from "@/lib/metrics";
 import { engagement } from "@/lib/outliers";
 import type { Post } from "@/lib/types";
 
@@ -159,10 +160,10 @@ function MetricsFields({
       onSubmit={(e) => {
         e.preventDefault();
         onSave({
-          impressions: Number(impressions) || 0,
-          likes: Number(likes) || 0,
-          replies: Number(replies) || 0,
-          reposts: Number(reposts) || 0,
+          impressions: nonNegativeInt(impressions),
+          likes: nonNegativeInt(likes),
+          replies: nonNegativeInt(replies),
+          reposts: nonNegativeInt(reposts),
         });
       }}
     >

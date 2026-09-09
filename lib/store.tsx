@@ -13,6 +13,7 @@ import { EMPTY_STATE, SEED_STATE } from "./seed";
 import { strategyFromPosts } from "./outliers";
 import { newId } from "./format";
 import { todayISO } from "./calendar";
+import { nonNegativeInt } from "./metrics";
 import { seoRunLimit, xRunLimit } from "./plans";
 import { isQuotaSnapshot, type QuotaSnapshot } from "./quota";
 import {
@@ -327,7 +328,13 @@ export function HubProvider({ children }: { children: React.ReactNode }) {
             ? {
                 ...p,
                 status: "posted" as const,
-                metrics: { ...metrics, loggedAt: new Date().toISOString() },
+                metrics: {
+                  impressions: nonNegativeInt(metrics.impressions),
+                  likes: nonNegativeInt(metrics.likes),
+                  replies: nonNegativeInt(metrics.replies),
+                  reposts: nonNegativeInt(metrics.reposts),
+                  loggedAt: new Date().toISOString(),
+                },
               }
             : p,
         );

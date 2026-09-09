@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { isTrackEventName } from "@/lib/analytics-events";
-import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { isServiceRoleConfigured, isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 
 const Body = z.object({
@@ -18,7 +19,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false }, { status: 400 });
   }
 
-  if (!isSupabaseConfigured()) {
+  if (!isSupabaseConfigured() || !isServiceRoleConfigured()) {
     return NextResponse.json({ ok: true });
   }
 
@@ -30,7 +31,8 @@ export async function POST(req: Request) {
     } = await supabase.auth.getUser();
     userId = user?.id ?? null;
 
-    const { error } = await supabase.from("analytics_events").insert({
+    const admin = createAdminClient();
+    const { error } = await admin.from("analytics_events").insert({
       name: parsed.data.name,
       path: parsed.data.path ?? null,
       props: parsed.data.props ?? {},

@@ -7,10 +7,7 @@ import { Shell } from "@/components/Shell";
 import { Ticker } from "@/components/Ticker";
 import { EMPTY_BRAND } from "@/lib/seed";
 import { useHub } from "@/lib/store";
-import {
-  createClient,
-  isBrowserSupabaseConfigured,
-} from "@/lib/supabase/client";
+import { isBrowserSupabaseConfigured } from "@/lib/supabase/client";
 import { track } from "@/lib/track";
 import type { Brand } from "@/lib/types";
 
@@ -28,14 +25,17 @@ export default function StartPage() {
     track("workspace_created", { demo });
     if (email.trim() && isBrowserSupabaseConfigured()) {
       try {
-        const origin =
-          process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
-        const supabase = createClient();
-        const { error: authError } = await supabase.auth.signInWithOtp({
-          email: email.trim().toLowerCase(),
-          options: { emailRedirectTo: `${origin.replace(/\/$/, "")}/hub` },
+        const res = await fetch("/api/auth/magic-link", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: email.trim().toLowerCase(),
+            next: "/hub",
+            source: "start",
+          }),
         });
-        if (authError) throw authError;
+        const data = (await res.json()) as { error?: string };
+        if (!res.ok) throw new Error(data.error || "Magic link failed");
         track("magic_link_sent", { source: "start" });
         setCheckEmail(true);
         return;

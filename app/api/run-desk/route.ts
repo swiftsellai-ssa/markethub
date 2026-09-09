@@ -4,20 +4,23 @@ import { runSeoDesk } from "@/lib/bots/run-seo";
 import { runXDesk } from "@/lib/bots/run-x";
 import { planLabel } from "@/lib/quota";
 import { refundDeskRun, takeDeskRun } from "@/lib/quota-server";
+import { allowRequest, RATE } from "@/lib/rate-limit";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 
 export const maxDuration = 120;
 
+const nonNegInt = z.number().int().nonnegative().max(1_000_000_000);
+
 const BrandSchema = z.object({
-  name: z.string(),
-  niche: z.string(),
-  product: z.string(),
-  audience: z.string(),
-  cta: z.string(),
-  tone: z.string(),
-  siteUrl: z.string(),
-  xHandle: z.string(),
+  name: z.string().min(1).max(200),
+  niche: z.string().min(1).max(200),
+  product: z.string().max(2000),
+  audience: z.string().max(2000),
+  cta: z.string().max(200),
+  tone: z.string().max(2000),
+  siteUrl: z.string().max(500),
+  xHandle: z.string().max(80),
 });
 
 const Body = z.object({
@@ -25,19 +28,19 @@ const Body = z.object({
   brand: BrandSchema,
   strategy: z
     .object({
-      winningHook: z.string(),
-      winningFormat: z.string(),
-      avoid: z.string(),
-      doubleDown: z.string(),
-      updatedAt: z.string(),
+      winningHook: z.string().max(2000),
+      winningFormat: z.string().max(2000),
+      avoid: z.string().max(2000),
+      doubleDown: z.string().max(2000),
+      updatedAt: z.string().max(40),
     })
     .optional(),
   recentPosts: z
     .array(
       z.object({
-        date: z.string(),
+        date: z.string().max(40),
         kind: z.enum(["single", "thread"]),
-        hook: z.string(),
+        hook: z.string().max(500),
         contentType: z.enum([
           "insight",
           "howto",
@@ -48,17 +51,18 @@ const Body = z.object({
         status: z.enum(["draft", "ready", "posted", "skipped"]),
         metrics: z
           .object({
-            impressions: z.number(),
-            likes: z.number(),
-            replies: z.number(),
-            reposts: z.number(),
-            loggedAt: z.string(),
+            impressions: nonNegInt,
+            likes: nonNegInt,
+            replies: nonNegInt,
+            reposts: nonNegInt,
+            loggedAt: z.string().max(40),
           })
           .optional(),
       }),
     )
+    .max(20)
     .optional(),
-  hint: z.string().optional(),
+  hint: z.string().max(200).optional(),
 });
 
 export async function POST(req: Request) {
@@ -88,9 +92,21 @@ export async function POST(req: Request) {
 
   const { deskType, brand, strategy, recentPosts, hint } = parsed.data;
 
+  const burstOk = await allowRequest(
+    `run:${user.id}`,
+    RATE.runDesk.limit,
+    RATE.runDesk.window,
+  );
+  if (!burstOk) {
+    return NextResponse.json(
+      { error: "Too many runs in a short window. Wait a few minutes." },
+      { status: 429 },
+    );
+  }
+
   let taken: Awaited<ReturnType<typeof takeDeskRun>>;
   try {
-    taken = await takeDeskRun(supabase, user.id, deskType);
+    taken = await takeDeskRun(user.id, deskType);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Quota check failed";
     return NextResponse.json({ error: message }, { status: 500 });
@@ -121,7 +137,7 @@ export async function POST(req: Request) {
   try {
     if (deskType === "x") {
       if (!strategy) {
-        await refundDeskRun(supabase, user.id, deskType);
+        await refundDeskRun(user.id, deskType);
         return NextResponse.json(
           { error: "strategy is required for the X desk" },
           { status: 400 },
@@ -132,13 +148,13 @@ export async function POST(req: Request) {
       result = await runSeoDesk({ brand, hint });
     }
   } catch (err) {
-    await refundDeskRun(supabase, user.id, deskType);
+    await refundDeskRun(user.id, deskType);
     const message = err instanceof Error ? err.message : "Generate failed";
     return NextResponse.json({ error: message }, { status: 502 });
   }
 
   if (!result.ok) {
-    await refundDeskRun(supabase, user.id, deskType);
+    await refundDeskRun(user.id, deskType);
     return NextResponse.json(
       { error: result.error },
       { status: result.status },

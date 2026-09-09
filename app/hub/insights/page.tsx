@@ -23,15 +23,37 @@ export default function InsightsPage() {
   const [days, setDays] = useState(7);
   const [rows, setRows] = useState<Array<{ name: string; n: number }>>([]);
   const [error, setError] = useState<string | null>(null);
+  const [locked, setLocked] = useState(false);
 
   useEffect(() => {
     if (!sessionUser) return;
+    setLocked(false);
     fetch(`/api/insights?days=${days}`)
       .then((r) => r.json())
-      .then((d: { rows?: Array<{ name: string; n: number }>; error?: string }) => {
-        if (d.error) setError(d.error);
-        setRows(d.rows ?? []);
-      })
+      .then(
+        (d: {
+          rows?: Array<{ name: string; n: number }>;
+          error?: string;
+          code?: string;
+        }) => {
+          if (
+            d.code === "INSIGHTS_FORBIDDEN" ||
+            d.code === "INSIGHTS_UNCONFIGURED"
+          ) {
+            setLocked(true);
+            setError(
+              d.code === "INSIGHTS_UNCONFIGURED"
+                ? "Set INSIGHTS_ALLOWED_EMAILS in Vercel to your login email."
+                : "Insights is operator-only.",
+            );
+            setRows([]);
+            return;
+          }
+          if (d.error) setError(d.error);
+          else setError(null);
+          setRows(d.rows ?? []);
+        },
+      )
       .catch(() => setError("Could not load insights"));
   }, [sessionUser, days]);
 
@@ -79,32 +101,38 @@ export default function InsightsPage() {
 
           {error ? (
             <p className="mt-6 text-sm text-hot">
-              {error}. Run <code>supabase/analytics.sql</code> in the SQL editor.
+              {error.includes("analytics_funnel")
+                ? "Run supabase/analytics.sql in the SQL editor."
+                : error}
             </p>
           ) : null}
 
-          <p className="mt-6 font-mono text-[11px] text-mute">
-            {total} events in window
-          </p>
+          {locked ? null : (
+            <>
+              <p className="mt-6 font-mono text-[11px] text-mute">
+                {total} events in window
+              </p>
 
-          <table className="mt-4 w-full max-w-lg text-left text-sm">
-            <thead className="font-mono text-[11px] uppercase tracking-widest text-mute">
-              <tr>
-                <th className="border-b border-line py-2">Event</th>
-                <th className="border-b border-line py-2">Count</th>
-              </tr>
-            </thead>
-            <tbody>
-              {FUNNEL.map((name) => (
-                <tr key={name} className="border-b border-line/60">
-                  <td className="py-2 font-mono text-xs">{name}</td>
-                  <td className="py-2 font-display text-lg font-extrabold">
-                    {byName[name] ?? 0}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+              <table className="mt-4 w-full max-w-lg text-left text-sm">
+                <thead className="font-mono text-[11px] uppercase tracking-widest text-mute">
+                  <tr>
+                    <th className="border-b border-line py-2">Event</th>
+                    <th className="border-b border-line py-2">Count</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {FUNNEL.map((name) => (
+                    <tr key={name} className="border-b border-line/60">
+                      <td className="py-2 font-mono text-xs">{name}</td>
+                      <td className="py-2 font-display text-lg font-extrabold">
+                        {byName[name] ?? 0}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </>
+          )}
         </>
       )}
     </main>

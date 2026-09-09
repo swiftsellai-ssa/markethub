@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { FOUNDING_CAP } from "@/lib/founding";
+import { allowRequest, clientIp, RATE } from "@/lib/rate-limit";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
 const Body = z.object({
-  email: z.string().email(),
-  source: z.string().optional(),
+  email: z.string().email().max(200),
+  source: z.string().max(80).optional(),
 });
 
 export async function POST(req: Request) {
@@ -16,7 +17,19 @@ export async function POST(req: Request) {
   }
 
   const email = parsed.data.email.toLowerCase().trim();
-  const source = parsed.data.source ?? "founding_50_modal";
+  const source = (parsed.data.source ?? "founding_50_modal").slice(0, 80);
+
+  const ipOk = await allowRequest(
+    `founding:ip:${clientIp(req)}`,
+    RATE.foundingIp.limit,
+    RATE.foundingIp.window,
+  );
+  if (!ipOk) {
+    return NextResponse.json(
+      { error: "Too many founding requests. Try again later." },
+      { status: 429 },
+    );
+  }
 
   if (!isSupabaseConfigured() || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
     console.log("founding_lead", email, source);
