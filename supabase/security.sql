@@ -1,7 +1,31 @@
 -- MarketsXHub security locks. Safe to re-run.
--- Run in the Supabase SQL editor AFTER the matching app deploy is live
--- (quota now uses the service role). Until this file runs, billing columns
--- can still be patched from the browser.
+-- Run in the Supabase SQL editor AFTER the matching app deploy is live.
+-- CREATE TABLE IF NOT EXISTS does not add columns to an existing table,
+-- so this file adds any missing workspace columns first.
+
+create table if not exists public.workspaces (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users (id) on delete cascade unique
+);
+
+alter table public.workspaces
+  add column if not exists plan text not null default 'free',
+  add column if not exists brand jsonb not null default '{}'::jsonb,
+  add column if not exists strategy jsonb,
+  add column if not exists research jsonb,
+  add column if not exists posts jsonb not null default '[]'::jsonb,
+  add column if not exists articles jsonb not null default '[]'::jsonb,
+  add column if not exists queue_state jsonb,
+  add column if not exists x_runs_used integer not null default 0,
+  add column if not exists seo_runs_used integer not null default 0,
+  add column if not exists billing_cycle_start date not null default (date_trunc('month', now())::date),
+  add column if not exists migrated_from_local boolean not null default false,
+  add column if not exists founding boolean not null default false,
+  add column if not exists founding_until timestamptz,
+  add column if not exists stripe_customer_id text,
+  add column if not exists stripe_subscription_id text,
+  add column if not exists created_at timestamptz not null default now(),
+  add column if not exists updated_at timestamptz not null default now();
 
 -- ---------------------------------------------------------------------------
 -- Non-negative run counters
@@ -117,26 +141,45 @@ create trigger workspaces_protect
   for each row execute function public.workspaces_protect();
 
 -- ---------------------------------------------------------------------------
--- Close leftover quota RPCs to browser JWTs
+-- Close leftover quota RPCs to browser JWTs (skip if never created)
 -- ---------------------------------------------------------------------------
-revoke all on function public.consume_bot_run(text) from public, anon, authenticated;
-revoke all on function public.refund_bot_run(text) from public, anon, authenticated;
-revoke all on function public.plan_limits(text) from public, anon, authenticated;
-grant execute on function public.consume_bot_run(text) to service_role;
-grant execute on function public.refund_bot_run(text) to service_role;
+do $$
+begin
+  if to_regprocedure('public.consume_bot_run(text)') is not null then
+    execute 'revoke all on function public.consume_bot_run(text) from public, anon, authenticated';
+    execute 'grant execute on function public.consume_bot_run(text) to service_role';
+  end if;
+  if to_regprocedure('public.refund_bot_run(text)') is not null then
+    execute 'revoke all on function public.refund_bot_run(text) from public, anon, authenticated';
+    execute 'grant execute on function public.refund_bot_run(text) to service_role';
+  end if;
+  if to_regprocedure('public.plan_limits(text)') is not null then
+    execute 'revoke all on function public.plan_limits(text) from public, anon, authenticated';
+  end if;
+end $$;
 
 -- ---------------------------------------------------------------------------
 -- Analytics + founding leads: API / service role only
 -- ---------------------------------------------------------------------------
-drop policy if exists "analytics_events_insert" on public.analytics_events;
-revoke insert, select, update, delete on public.analytics_events from anon, authenticated;
-revoke all on function public.analytics_funnel(integer) from public, anon, authenticated;
-grant execute on function public.analytics_funnel(integer) to service_role;
-
-drop policy if exists "founding_leads_insert" on public.founding_leads;
-revoke insert, select, update, delete on public.founding_leads from anon, authenticated;
-revoke all on function public.founding_seats_taken() from public, anon, authenticated;
-grant execute on function public.founding_seats_taken() to service_role;
+do $$
+begin
+  if to_regclass('public.analytics_events') is not null then
+    execute 'drop policy if exists "analytics_events_insert" on public.analytics_events';
+    execute 'revoke insert, select, update, delete on public.analytics_events from anon, authenticated';
+  end if;
+  if to_regprocedure('public.analytics_funnel(integer)') is not null then
+    execute 'revoke all on function public.analytics_funnel(integer) from public, anon, authenticated';
+    execute 'grant execute on function public.analytics_funnel(integer) to service_role';
+  end if;
+  if to_regclass('public.founding_leads') is not null then
+    execute 'drop policy if exists "founding_leads_insert" on public.founding_leads';
+    execute 'revoke insert, select, update, delete on public.founding_leads from anon, authenticated';
+  end if;
+  if to_regprocedure('public.founding_seats_taken()') is not null then
+    execute 'revoke all on function public.founding_seats_taken() from public, anon, authenticated';
+    execute 'grant execute on function public.founding_seats_taken() to service_role';
+  end if;
+end $$;
 
 -- ---------------------------------------------------------------------------
 -- Rate limit counter (service role only)

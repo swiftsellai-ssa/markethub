@@ -25,6 +25,26 @@ create table if not exists public.workspaces (
   updated_at timestamptz not null default now()
 );
 
+-- CREATE TABLE IF NOT EXISTS is a no-op on an older workspaces table.
+alter table public.workspaces
+  add column if not exists plan text not null default 'free',
+  add column if not exists brand jsonb not null default '{}'::jsonb,
+  add column if not exists strategy jsonb,
+  add column if not exists research jsonb,
+  add column if not exists posts jsonb not null default '[]'::jsonb,
+  add column if not exists articles jsonb not null default '[]'::jsonb,
+  add column if not exists queue_state jsonb,
+  add column if not exists x_runs_used integer not null default 0,
+  add column if not exists seo_runs_used integer not null default 0,
+  add column if not exists billing_cycle_start date not null default (date_trunc('month', now())::date),
+  add column if not exists migrated_from_local boolean not null default false,
+  add column if not exists founding boolean not null default false,
+  add column if not exists founding_until timestamptz,
+  add column if not exists stripe_customer_id text,
+  add column if not exists stripe_subscription_id text,
+  add column if not exists created_at timestamptz not null default now(),
+  add column if not exists updated_at timestamptz not null default now();
+
 create table if not exists public.founding_leads (
   id uuid primary key default gen_random_uuid(),
   email text not null unique,
