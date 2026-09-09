@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { AuthNav } from "@/components/AuthNav";
 import { Logo } from "@/components/Logo";
 import { Toast } from "@/components/Toast";
+import { planLabel } from "@/lib/quota";
 import { useHub } from "@/lib/store";
 
 const NAV = [
@@ -37,7 +38,7 @@ export default function HubLayout({ children }: { children: React.ReactNode }) {
                 : "Workspace"}
             </p>
             <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-cyan">
-              {ready ? state.account.plan : ""}
+              {ready ? planLabel(state.account.plan) : ""}
             </p>
             <div className="mt-2 font-mono text-[10px] tracking-[0.04em]">
               <AuthNav compact />

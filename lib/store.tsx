@@ -14,6 +14,7 @@ import { strategyFromPosts } from "./outliers";
 import { newId } from "./format";
 import { todayISO } from "./calendar";
 import { seoRunLimit, xRunLimit } from "./plans";
+import { isQuotaSnapshot, type QuotaSnapshot } from "./quota";
 import {
   createClient,
   isBrowserSupabaseConfigured,
@@ -61,6 +62,7 @@ type HubContextValue = {
   consumeXRun: () => void;
   consumeSeoRun: () => void;
   setRunsUsed: (input: { x?: number; seo?: number }) => void;
+  applyQuota: (quota: QuotaSnapshot) => void;
   onboard: (input: { brand: Brand; email: string; demo?: boolean }) => void;
   requestFounding: (email: string) => void;
   reset: () => void;
@@ -132,6 +134,19 @@ export function HubProvider({ children }: { children: React.ReactNode }) {
   const sessionRef = useRef(sessionUser);
   const [notice, setNotice] = useState<string | null>(null);
   const [noticeError, setNoticeError] = useState(false);
+
+  const applyQuota = useCallback((quota: QuotaSnapshot) => {
+    setState((s) => ({
+      ...s,
+      account: {
+        ...s.account,
+        plan: quota.plan,
+        foundingRequested: quota.founding || s.account.foundingRequested,
+        xRunsUsed: quota.xUsed,
+        seoRunsUsed: quota.seoUsed,
+      },
+    }));
+  }, []);
   stateRef.current = state;
   sessionRef.current = sessionUser;
 
@@ -183,6 +198,24 @@ export function HubProvider({ children }: { children: React.ReactNode }) {
     if (sessionUser) return;
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [ready, sessionUser, state]);
+
+  useEffect(() => {
+    if (!ready || !sessionUser) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch("/api/quota");
+        const data: unknown = await res.json();
+        if (cancelled || !res.ok || !isQuotaSnapshot(data)) return;
+        applyQuota(data);
+      } catch {
+        // Keep hydrated workspace numbers if the quota endpoint is down.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [ready, sessionUser, applyQuota]);
 
   useEffect(() => {
     if (!ready || !sessionUser || !cloudHydrated || skipPersist.current) return;
@@ -432,6 +465,7 @@ export function HubProvider({ children }: { children: React.ReactNode }) {
       consumeXRun,
       consumeSeoRun,
       setRunsUsed,
+      applyQuota,
       onboard,
       requestFounding,
       reset,
@@ -459,6 +493,7 @@ export function HubProvider({ children }: { children: React.ReactNode }) {
       consumeXRun,
       consumeSeoRun,
       setRunsUsed,
+      applyQuota,
       onboard,
       requestFounding,
       reset,

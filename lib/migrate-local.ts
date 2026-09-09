@@ -59,8 +59,8 @@ export async function checkAndMigrateLocalStorage(
       posts: local.posts,
       articles: local.articles ?? [],
       plan: "free",
-      x_runs_used: local.account?.xRunsUsed ?? 0,
-      seo_runs_used: local.account?.seoRunsUsed ?? 0,
+      x_runs_used: 0,
+      seo_runs_used: 0,
       queue_state: {
         account: local.account,
         migratedAt: new Date().toISOString(),
@@ -81,8 +81,6 @@ export async function checkAndMigrateLocalStorage(
         research: local.research,
         posts: local.posts,
         articles: local.articles ?? [],
-        x_runs_used: local.account?.xRunsUsed ?? 0,
-        seo_runs_used: local.account?.seoRunsUsed ?? 0,
         queue_state: {
           account: local.account,
           migratedAt: new Date().toISOString(),

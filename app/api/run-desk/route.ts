@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { runSeoDesk } from "@/lib/bots/run-seo";
 import { runXDesk } from "@/lib/bots/run-x";
+import { planLabel } from "@/lib/quota";
+import { refundDeskRun, takeDeskRun } from "@/lib/quota-server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 
@@ -59,8 +61,6 @@ const Body = z.object({
   hint: z.string().optional(),
 });
 
-type QuotaRow = { allowed: boolean; remaining_runs: number };
-
 export async function POST(req: Request) {
   const parsed = Body.safeParse(await req.json());
   if (!parsed.success) {
@@ -88,20 +88,27 @@ export async function POST(req: Request) {
 
   const { deskType, brand, strategy, recentPosts, hint } = parsed.data;
 
-  const { data: quotaCheck, error: rpcErr } = await supabase.rpc(
-    "consume_bot_run",
-    { target_desk: deskType },
-  );
+  let taken: Awaited<ReturnType<typeof takeDeskRun>>;
+  try {
+    taken = await takeDeskRun(supabase, user.id, deskType);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Quota check failed";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 
-  const row = (Array.isArray(quotaCheck) ? quotaCheck[0] : quotaCheck) as
-    | QuotaRow
-    | undefined;
-
-  if (rpcErr || !row?.allowed) {
+  if (!taken.ok) {
+    const left = deskType === "x" ? taken.quota.xLeft : taken.quota.seoLeft;
+    const limit = deskType === "x" ? taken.quota.xLimit : taken.quota.seoLimit;
+    const planName = planLabel(taken.quota.plan);
+    const upgradeHint =
+      taken.quota.plan === "free"
+        ? " Upgrade to Desk or Floor."
+        : " Resets next billing cycle.";
     return NextResponse.json(
       {
-        error:
-          "Quota exhausted for this billing cycle. Upgrade to Desk or Floor.",
+        error: `No ${deskType.toUpperCase()} runs left on ${planName} (${left}/${limit} this month).${upgradeHint}`,
+        code: "QUOTA",
+        quota: taken.quota,
       },
       { status: 403 },
     );
@@ -114,7 +121,7 @@ export async function POST(req: Request) {
   try {
     if (deskType === "x") {
       if (!strategy) {
-        await supabase.rpc("refund_bot_run", { target_desk: deskType });
+        await refundDeskRun(supabase, user.id, deskType);
         return NextResponse.json(
           { error: "strategy is required for the X desk" },
           { status: 400 },
@@ -125,22 +132,26 @@ export async function POST(req: Request) {
       result = await runSeoDesk({ brand, hint });
     }
   } catch (err) {
-    await supabase.rpc("refund_bot_run", { target_desk: deskType });
+    await refundDeskRun(supabase, user.id, deskType);
     const message = err instanceof Error ? err.message : "Generate failed";
     return NextResponse.json({ error: message }, { status: 502 });
   }
 
   if (!result.ok) {
-    await supabase.rpc("refund_bot_run", { target_desk: deskType });
+    await refundDeskRun(supabase, user.id, deskType);
     return NextResponse.json(
       { error: result.error },
       { status: result.status },
     );
   }
 
+  const remaining =
+    deskType === "x" ? taken.quota.xLeft : taken.quota.seoLeft;
+
   return NextResponse.json({
     ...result.data,
-    runsRemaining: row.remaining_runs,
+    runsRemaining: remaining,
     serverQuota: true,
+    quota: taken.quota,
   });
 }

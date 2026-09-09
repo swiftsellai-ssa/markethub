@@ -5,11 +5,13 @@ import Link from "next/link";
 import { CopyButton } from "@/components/CopyButton";
 import { useHub } from "@/lib/store";
 import { PLANS } from "@/lib/plans";
+import { isQuotaSnapshot, planLabel, type QuotaSnapshot } from "@/lib/quota";
 import { track } from "@/lib/track";
 import type { Article } from "@/lib/types";
 
 export default function SeoBotPage() {
-  const { state, sessionUser, seoRunsLeft, addArticle, consumeSeoRun } = useHub();
+  const { state, sessionUser, seoRunsLeft, addArticle, consumeSeoRun, applyQuota } =
+    useHub();
   const [hint, setHint] = useState("");
   const [hasKey, setHasKey] = useState<boolean | null>(null);
   const [busy, setBusy] = useState(false);
@@ -29,7 +31,9 @@ export default function SeoBotPage() {
       return;
     }
     if (seoRunsLeft <= 0) {
-      setError("No SEO runs left on this plan. Upgrade on /pricing.");
+      setError(
+        `No SEO runs left on ${planLabel(state.account.plan)} (${seoRunsLeft}/${PLANS[state.account.plan].seoRuns} this month). Upgrade on /pricing.`,
+      );
       return;
     }
     setBusy(true);
@@ -48,7 +52,9 @@ export default function SeoBotPage() {
         error?: string;
         markdown?: string;
         serverQuota?: boolean;
+        quota?: QuotaSnapshot;
       };
+      if (isQuotaSnapshot(data.quota)) applyQuota(data.quota);
       if (!res.ok) {
         track("desk_run_failed", { desk: "seo" });
         throw new Error(data.error || "Run failed");
@@ -62,7 +68,7 @@ export default function SeoBotPage() {
         markdown: data.markdown,
         opportunity: data.opportunity,
       });
-      consumeSeoRun();
+      if (!isQuotaSnapshot(data.quota)) consumeSeoRun();
       setOpen(article);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Run failed");
@@ -72,11 +78,12 @@ export default function SeoBotPage() {
   }
 
   const limit = PLANS[state.account.plan].seoRuns;
+  const plan = planLabel(state.account.plan);
 
   return (
     <main className="px-5 py-8 md:px-10">
       <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-lime">
-        Bot 1 · Live · {state.account.plan} · {seoRunsLeft}/{limit} briefs left
+        Bot 1 · Live · {plan} · {seoRunsLeft}/{limit} briefs left
       </p>
       <h1 className="mt-3 font-display text-4xl font-extrabold tracking-tight">
         SEO desk
@@ -109,6 +116,14 @@ export default function SeoBotPage() {
             Log in
           </Link>{" "}
           to run SEO. Quota is per account.
+        </p>
+      ) : seoRunsLeft <= 0 ? (
+        <p className="mt-3 text-xs text-mute">
+          {plan} is out of SEO briefs this month.{" "}
+          <Link href="/pricing" className="text-cyan hover:text-lime">
+            Upgrade
+          </Link>
+          .
         </p>
       ) : null}
       {hasKey === false ? (

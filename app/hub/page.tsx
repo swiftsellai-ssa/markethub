@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef } from "react";
 import { DeskTerminal } from "@/components/DeskTerminal";
+import { planLabel } from "@/lib/quota";
 import { useHub } from "@/lib/store";
 import { track } from "@/lib/track";
 import { averageScore, outliers, scoredPosts } from "@/lib/outliers";
@@ -80,7 +81,7 @@ function HubOverviewBody() {
         {state.brand.name || "Four desks."}
       </h1>
       <p className="mt-3 max-w-xl text-paper/65">
-        {state.account.plan} plan · {state.brand.niche || "Onboard a niche"}. X
+        {planLabel(state.account.plan)} · {state.brand.niche || "Onboard a niche"}. X
         and SEO are live. Video and ads wait their week.
       </p>
 
