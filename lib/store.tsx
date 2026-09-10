@@ -434,6 +434,7 @@ export function HubProvider({ children }: { children: React.ReactNode }) {
     }
     setSessionUser(null);
     setCloudHydrated(false);
+    window.location.assign("/");
   }, []);
 
   const today = todayISO();

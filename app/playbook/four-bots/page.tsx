@@ -5,6 +5,20 @@ export const metadata: Metadata = {
   title: "Four bots, one morning — MarketsXHub Playbook",
   description:
     "SEO, video, X, and ads bots. Each owns a channel. Each runs research, publish, and track. Do not stand up all four at once.",
+  openGraph: {
+    images: [
+      {
+        url: "/api/og?title=Four%20desks%2C%20one%20morning&metric=4%20desks",
+        width: 1200,
+        height: 630,
+        alt: "Four desks, one morning — MarketsXHub",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/api/og?title=Four%20desks%2C%20one%20morning&metric=4%20desks"],
+  },
 };
 
 export default function FourBotsPage() {

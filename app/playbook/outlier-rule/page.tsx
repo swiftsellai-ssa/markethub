@@ -5,6 +5,20 @@ export const metadata: Metadata = {
   title: "The 2x outlier rule — MarketsXHub Playbook",
   description:
     "Track every result. Find what is 2x above average. Push it harder. Build three variations. The winner becomes the new baseline.",
+  openGraph: {
+    images: [
+      {
+        url: "/api/og?title=The%202%C3%97%20outlier%20rule&metric=2%C3%97",
+        width: 1200,
+        height: 630,
+        alt: "The 2× outlier rule — MarketsXHub",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/api/og?title=The%202%C3%97%20outlier%20rule&metric=2%C3%97"],
+  },
 };
 
 export default function OutlierRulePage() {

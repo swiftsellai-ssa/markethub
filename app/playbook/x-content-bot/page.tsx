@@ -5,6 +5,20 @@ export const metadata: Metadata = {
   title: "How the X Content Bot actually runs — MarketsXHub Playbook",
   description:
     "The X Content Bot researches the last 48 hours, writes one tweet or thread, and never publishes for you. Zero ad spend.",
+  openGraph: {
+    images: [
+      {
+        url: "/api/og?title=How%20the%20X%20desk%20actually%20runs&metric=0%20spend",
+        width: 1200,
+        height: 630,
+        alt: "How the X desk actually runs — MarketsXHub",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/api/og?title=How%20the%20X%20desk%20actually%20runs&metric=0%20spend"],
+  },
 };
 
 export default function XBotPlaybookPage() {
