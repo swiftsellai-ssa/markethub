@@ -2,6 +2,9 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { isServiceRoleConfigured } from "@/lib/supabase/env";
 import { quotaFromRow, type QuotaSnapshot } from "./quota";
 
+const QUOTA_SELECT =
+  "id, plan, founding, x_runs_used, seo_runs_used, billing_cycle_start, stripe_subscription_id, stripe_customer_id";
+
 type WorkspaceQuotaRow = {
   id: string;
   plan: string;
@@ -9,6 +12,8 @@ type WorkspaceQuotaRow = {
   x_runs_used: number;
   seo_runs_used: number;
   billing_cycle_start: string | null;
+  stripe_subscription_id: string | null;
+  stripe_customer_id: string | null;
 };
 
 function admin() {
@@ -21,7 +26,7 @@ function admin() {
 async function loadWorkspace(userId: string): Promise<WorkspaceQuotaRow | null> {
   const { data, error } = await admin()
     .from("workspaces")
-    .select("id, plan, founding, x_runs_used, seo_runs_used, billing_cycle_start")
+    .select(QUOTA_SELECT)
     .eq("user_id", userId)
     .maybeSingle();
   if (error) throw new Error(error.message);
@@ -50,7 +55,7 @@ async function maybeResetMonth(
       updated_at: new Date().toISOString(),
     })
     .eq("id", row.id)
-    .select("id, plan, founding, x_runs_used, seo_runs_used, billing_cycle_start")
+    .select(QUOTA_SELECT)
     .single();
   if (error || !data) {
     return { ...row, x_runs_used: 0, seo_runs_used: 0, billing_cycle_start: start };
@@ -67,7 +72,32 @@ export async function readQuota(userId: string): Promise<QuotaSnapshot> {
   }
   if (!row) throw new Error("Workspace missing");
   row = await maybeResetMonth(userId, row);
+  row = await dropUnpaidPaidPlan(row);
   return quotaFromRow(row);
+}
+
+/** Desk/Floor without a Stripe subscription is leftover from before the billing lock. */
+async function dropUnpaidPaidPlan(
+  row: WorkspaceQuotaRow,
+): Promise<WorkspaceQuotaRow> {
+  if (row.plan !== "desk" && row.plan !== "floor") return row;
+  if (row.stripe_subscription_id || row.stripe_customer_id) return row;
+
+  const { data, error } = await admin()
+    .from("workspaces")
+    .update({
+      plan: "free",
+      founding: false,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", row.id)
+    .is("stripe_subscription_id", null)
+    .is("stripe_customer_id", null)
+    .select(QUOTA_SELECT)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data) return row;
+  return data as WorkspaceQuotaRow;
 }
 
 export async function takeDeskRun(
@@ -86,7 +116,7 @@ export async function takeDeskRun(
     .update({ [field]: nextUsed, updated_at: new Date().toISOString() })
     .eq("user_id", userId)
     .eq(field, used)
-    .select("id, plan, founding, x_runs_used, seo_runs_used, billing_cycle_start")
+    .select(QUOTA_SELECT)
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) {

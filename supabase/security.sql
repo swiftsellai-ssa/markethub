@@ -234,3 +234,13 @@ $$;
 revoke all on function public.hit_rate_limit(text, integer, integer) from public, anon, authenticated;
 grant execute on function public.hit_rate_limit(text, integer, integer) to service_role;
 grant all on table public.rate_limits to service_role;
+
+-- Desk/Floor with no Stripe ids is leftover from before billing columns were locked.
+update public.workspaces
+set
+  plan = 'free',
+  founding = false,
+  updated_at = now()
+where plan in ('desk', 'floor')
+  and stripe_subscription_id is null
+  and stripe_customer_id is null;
