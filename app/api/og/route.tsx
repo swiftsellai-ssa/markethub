@@ -43,7 +43,7 @@ export async function GET(req: Request) {
   const display = syne ? "Syne" : "sans-serif";
   const tick = mono ? "IBM Plex Mono" : "monospace";
 
-  return new ImageResponse(
+  const image = new ImageResponse(
     (
       <div
         style={{
@@ -250,9 +250,13 @@ export async function GET(req: Request) {
       width: OG_WIDTH,
       height: OG_HEIGHT,
       fonts: fonts.length ? fonts : undefined,
-      headers: {
-        "Cache-Control": CACHE,
-      },
     },
   );
+
+  return new Response(image.body, {
+    headers: {
+      "Content-Type": "image/png",
+      "Cache-Control": CACHE,
+    },
+  });
 }
