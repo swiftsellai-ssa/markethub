@@ -24,6 +24,7 @@ import { checkAndMigrateLocalStorage } from "@/lib/migrate-local";
 import { track } from "@/lib/track";
 import {
   hubToWorkspacePatch,
+  mergeHub,
   workspaceToHub,
   type WorkspaceRow,
 } from "@/lib/workspace-map";
@@ -103,10 +104,14 @@ function migrate(raw: unknown): HubState | null {
 
 function writeCloud(next: HubState, userId: string) {
   const supabase = createClient();
-  return supabase
-    .from("workspaces")
-    .update(hubToWorkspacePatch(next))
-    .eq("user_id", userId);
+  const patch = hubToWorkspacePatch(next);
+  if (next.posts.length === 0) {
+    delete (patch as { posts?: HubState["posts"] }).posts;
+  }
+  if (next.articles.length === 0) {
+    delete (patch as { articles?: HubState["articles"] }).articles;
+  }
+  return supabase.from("workspaces").update(patch).eq("user_id", userId);
 }
 
 function loadState(): HubState {
@@ -186,7 +191,9 @@ export function HubProvider({ children }: { children: React.ReactNode }) {
         .maybeSingle();
 
       if (row) {
-        setState(workspaceToHub(row as WorkspaceRow, user.email ?? ""));
+        setState(
+          mergeHub(workspaceToHub(row as WorkspaceRow, user.email ?? ""), local),
+        );
       }
       setCloudHydrated(true);
       setReady(true);

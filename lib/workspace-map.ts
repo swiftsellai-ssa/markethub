@@ -44,6 +44,28 @@ export function workspaceToHub(row: WorkspaceRow, email: string): HubState {
   };
 }
 
+/** Keep local queue/report if the cloud row is an empty insert. */
+export function mergeHub(cloud: HubState, local: HubState): HubState {
+  const cloudEmpty = cloud.posts.length === 0 && cloud.articles.length === 0;
+  const localHas =
+    local.posts.length > 0 ||
+    local.articles.length > 0 ||
+    Boolean(local.brand.name);
+  if (!cloudEmpty || !localHas) return cloud;
+  return {
+    ...cloud,
+    brand: cloud.brand.name ? cloud.brand : local.brand,
+    posts: local.posts,
+    articles: local.articles.length ? local.articles : cloud.articles,
+    strategy: cloud.strategy.updatedAt ? cloud.strategy : local.strategy,
+    research: cloud.research ?? local.research,
+    account: {
+      ...cloud.account,
+      onboarded: cloud.account.onboarded || local.account.onboarded,
+    },
+  };
+}
+
 export function hubToWorkspacePatch(state: HubState) {
   return {
     brand: state.brand,

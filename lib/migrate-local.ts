@@ -70,7 +70,29 @@ export async function checkAndMigrateLocalStorage(
     });
 
     if (insertErr) {
-      return { migrated: false, error: insertErr.message };
+      if (insertErr.code !== "23505") {
+        return { migrated: false, error: insertErr.message };
+      }
+      const { data: existing } = await supabase
+        .from("workspaces")
+        .select("id, posts")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      const cloudPosts = existing && Array.isArray(existing.posts) ? existing.posts : [];
+      if (existing && cloudPosts.length === 0 && local.posts.length > 0) {
+        await supabase
+          .from("workspaces")
+          .update({
+            brand: local.brand,
+            strategy: local.strategy,
+            research: local.research,
+            posts: local.posts,
+            articles: local.articles ?? [],
+            migrated_from_local: true,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", existing.id);
+      }
     }
   } else if (!workspace.migrated_from_local) {
     const { error } = await supabase

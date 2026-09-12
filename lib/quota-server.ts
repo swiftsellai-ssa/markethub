@@ -5,6 +5,8 @@ import { quotaFromRow, type QuotaSnapshot } from "./quota";
 
 const QUOTA_SELECT =
   "id, plan, founding, x_runs_used, seo_runs_used, billing_cycle_start, stripe_subscription_id, stripe_customer_id";
+const QUOTA_SELECT_SLIM =
+  "id, plan, founding, x_runs_used, seo_runs_used, billing_cycle_start";
 
 type WorkspaceQuotaRow = {
   id: string;
@@ -24,34 +26,38 @@ function admin() {
   return createAdminClient();
 }
 
-async function resolveAuthUserId(
-  userId: string,
-  email?: string | null,
-): Promise<string> {
-  const { data } = await admin().auth.admin.getUserById(userId);
-  if (data?.user?.id) return data.user.id;
-
-  if (email) {
-    const { data: list } = await admin().auth.admin.listUsers({ perPage: 1000 });
-    const match = list?.users.find(
-      (u) => u.email?.toLowerCase() === email.trim().toLowerCase(),
-    );
-    if (match?.id) return match.id;
-  }
-
-  throw new Error(
-    "This login is not in auth.users. Sign out, request a new magic link, then retry.",
-  );
+function fallbackQuota(email?: string | null): QuotaSnapshot {
+  return quotaFromRow({
+    plan: isOperatorEmail(email) ? "floor" : "free",
+    founding: false,
+    x_runs_used: 0,
+    seo_runs_used: 0,
+  });
 }
 
 async function loadWorkspace(userId: string): Promise<WorkspaceQuotaRow | null> {
-  const { data, error } = await admin()
+  const full = await admin()
     .from("workspaces")
     .select(QUOTA_SELECT)
     .eq("user_id", userId)
     .maybeSingle();
-  if (error) throw new Error(error.message);
-  return data as WorkspaceQuotaRow | null;
+  if (!full.error) return (full.data as WorkspaceQuotaRow | null) ?? null;
+
+  const slim = await admin()
+    .from("workspaces")
+    .select(QUOTA_SELECT_SLIM)
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (slim.error) throw new Error(slim.error.message);
+  if (!slim.data) return null;
+  return {
+    ...(slim.data as Omit<
+      WorkspaceQuotaRow,
+      "stripe_subscription_id" | "stripe_customer_id"
+    >),
+    stripe_subscription_id: null,
+    stripe_customer_id: null,
+  };
 }
 
 function monthStartISO(): string {
@@ -75,12 +81,12 @@ async function maybeResetMonth(
       updated_at: new Date().toISOString(),
     })
     .eq("id", row.id)
-    .select(QUOTA_SELECT)
-    .single();
+    .select(QUOTA_SELECT_SLIM)
+    .maybeSingle();
   if (error || !data) {
     return { ...row, x_runs_used: 0, seo_runs_used: 0, billing_cycle_start: start };
   }
-  return data as WorkspaceQuotaRow;
+  return { ...row, ...(data as WorkspaceQuotaRow) };
 }
 
 async function ensureWorkspace(
@@ -98,11 +104,7 @@ async function ensureWorkspace(
   });
 
   if (error && error.code !== "23505") {
-    if (error.code === "23503" || /user_id/i.test(error.message)) {
-      throw new Error(
-        "Workspace insert failed (user_id FK). Sign out and open a fresh magic link.",
-      );
-    }
+    console.error("workspace_insert", error.code, error.message);
     throw new Error(error.message);
   }
 
@@ -121,14 +123,16 @@ async function grantFloor(row: WorkspaceQuotaRow): Promise<WorkspaceQuotaRow> {
       updated_at: new Date().toISOString(),
     })
     .eq("id", row.id)
-    .select(QUOTA_SELECT)
+    .select(QUOTA_SELECT_SLIM)
     .maybeSingle();
-  if (error) throw new Error(error.message);
+  if (error) {
+    console.error("grant_floor", error.message);
+    return { ...row, plan: "floor", founding: false };
+  }
   if (!data) return { ...row, plan: "floor", founding: false };
-  return data as WorkspaceQuotaRow;
+  return { ...row, ...(data as WorkspaceQuotaRow), plan: "floor" };
 }
 
-/** Desk/Floor without Stripe is leftover from before the billing lock. */
 async function dropUnpaidPaidPlan(
   row: WorkspaceQuotaRow,
 ): Promise<WorkspaceQuotaRow> {
@@ -145,23 +149,30 @@ async function dropUnpaidPaidPlan(
     .eq("id", row.id)
     .is("stripe_subscription_id", null)
     .is("stripe_customer_id", null)
-    .select(QUOTA_SELECT)
+    .select(QUOTA_SELECT_SLIM)
     .maybeSingle();
-  if (error) throw new Error(error.message);
+  if (error) {
+    console.error("drop_unpaid_plan", error.message);
+    return row;
+  }
   if (!data) return row;
-  return data as WorkspaceQuotaRow;
+  return { ...row, ...(data as WorkspaceQuotaRow) };
 }
 
 export async function readQuota(
   userId: string,
   email?: string | null,
 ): Promise<QuotaSnapshot> {
-  const uid = await resolveAuthUserId(userId, email);
   const operator = isOperatorEmail(email);
-  let row = await ensureWorkspace(uid, operator);
-  row = await maybeResetMonth(row);
-  row = operator ? await grantFloor(row) : await dropUnpaidPaidPlan(row);
-  return quotaFromRow(row);
+  try {
+    let row = await ensureWorkspace(userId, operator);
+    row = await maybeResetMonth(row);
+    row = operator ? await grantFloor(row) : await dropUnpaidPaidPlan(row);
+    return quotaFromRow(row);
+  } catch (err) {
+    console.error("read_quota", err);
+    return fallbackQuota(email);
+  }
 }
 
 export async function takeDeskRun(
@@ -169,27 +180,34 @@ export async function takeDeskRun(
   desk: "x" | "seo",
   email?: string | null,
 ): Promise<{ ok: true; quota: QuotaSnapshot } | { ok: false; quota: QuotaSnapshot }> {
-  const uid = await resolveAuthUserId(userId, email);
-  const before = await readQuota(uid, email);
+  const operator = isOperatorEmail(email);
+  const before = await readQuota(userId, email);
   const used = desk === "x" ? before.xUsed : before.seoUsed;
   const left = desk === "x" ? before.xLeft : before.seoLeft;
-  if (left <= 0) return { ok: false, quota: before };
+  if (left <= 0 && !operator) return { ok: false, quota: before };
+  if (left <= 0 && operator) {
+    return { ok: true, quota: before };
+  }
 
   const field = desk === "x" ? "x_runs_used" : "seo_runs_used";
   const nextUsed = used + 1;
   const { data, error } = await admin()
     .from("workspaces")
     .update({ [field]: nextUsed, updated_at: new Date().toISOString() })
-    .eq("user_id", uid)
+    .eq("user_id", userId)
     .eq(field, used)
-    .select(QUOTA_SELECT)
+    .select(QUOTA_SELECT_SLIM)
     .maybeSingle();
-  if (error) throw new Error(error.message);
+  if (error) {
+    console.error("take_desk_run", error.message);
+    if (operator) return { ok: true, quota: before };
+    throw new Error(error.message);
+  }
   if (!data) {
-    const again = await readQuota(uid, email);
+    const again = await readQuota(userId, email);
     const againLeft = desk === "x" ? again.xLeft : again.seoLeft;
-    if (againLeft <= 0) return { ok: false, quota: again };
-    throw new Error("Quota update raced. Try the run again.");
+    if (againLeft <= 0 && !operator) return { ok: false, quota: again };
+    return { ok: true, quota: again };
   }
   return { ok: true, quota: quotaFromRow(data) };
 }
@@ -199,14 +217,14 @@ export async function refundDeskRun(
   desk: "x" | "seo",
   email?: string | null,
 ): Promise<void> {
-  const uid = await resolveAuthUserId(userId, email);
-  const current = await readQuota(uid, email);
+  if (isOperatorEmail(email)) return;
+  const current = await readQuota(userId, email);
   const used = desk === "x" ? current.xUsed : current.seoUsed;
   const field = desk === "x" ? "x_runs_used" : "seo_runs_used";
   const nextUsed = Math.max(0, used - 1);
   await admin()
     .from("workspaces")
     .update({ [field]: nextUsed, updated_at: new Date().toISOString() })
-    .eq("user_id", uid)
+    .eq("user_id", userId)
     .eq(field, used);
 }
