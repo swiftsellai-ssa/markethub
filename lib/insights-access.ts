@@ -14,6 +14,11 @@ export function canViewInsights(email: string | null | undefined): boolean {
   return allow.includes(email.trim().toLowerCase());
 }
 
+/** Founder emails in INSIGHTS_ALLOWED_EMAILS get Floor for product testing. */
+export function isOperatorEmail(email: string | null | undefined): boolean {
+  return canViewInsights(email);
+}
+
 export function insightsConfigured(): boolean {
   return allowedEmails().length > 0;
 }

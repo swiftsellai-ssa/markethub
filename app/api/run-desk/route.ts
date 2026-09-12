@@ -106,7 +106,7 @@ export async function POST(req: Request) {
 
   let taken: Awaited<ReturnType<typeof takeDeskRun>>;
   try {
-    taken = await takeDeskRun(user.id, deskType);
+    taken = await takeDeskRun(user.id, deskType, user.email);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Quota check failed";
     return NextResponse.json({ error: message }, { status: 500 });
@@ -137,7 +137,7 @@ export async function POST(req: Request) {
   try {
     if (deskType === "x") {
       if (!strategy) {
-        await refundDeskRun(user.id, deskType);
+        await refundDeskRun(user.id, deskType, user.email);
         return NextResponse.json(
           { error: "strategy is required for the X desk" },
           { status: 400 },
@@ -148,13 +148,13 @@ export async function POST(req: Request) {
       result = await runSeoDesk({ brand, hint });
     }
   } catch (err) {
-    await refundDeskRun(user.id, deskType);
+    await refundDeskRun(user.id, deskType, user.email);
     const message = err instanceof Error ? err.message : "Generate failed";
     return NextResponse.json({ error: message }, { status: 502 });
   }
 
   if (!result.ok) {
-    await refundDeskRun(user.id, deskType);
+    await refundDeskRun(user.id, deskType, user.email);
     return NextResponse.json(
       { error: result.error },
       { status: result.status },

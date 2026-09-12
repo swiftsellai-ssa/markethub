@@ -15,7 +15,7 @@ export async function GET() {
     return NextResponse.json({ error: "Sign in required" }, { status: 401 });
   }
   try {
-    const quota = await readQuota(user.id);
+    const quota = await readQuota(user.id, user.email);
     return NextResponse.json(quota);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Quota read failed";
